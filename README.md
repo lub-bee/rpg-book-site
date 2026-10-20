@@ -36,16 +36,16 @@ content/
   embleme.svg              the emblem (traced SVG)
   01-echantillons/         one folder = one SECTION = one ribbon
     section.json           { "titre", "court", "couleur", "icone", "prive"?, ... }
-    01-potions.md          one file = one PAGE = one thumb tab
-    02-armes.md
-    marchandises.csv       data for the ledger pages
+    01-mots-a-la-piece.md          one file = one PAGE = one thumb tab
+    02-ouvrages-relies.md
+    catalogue.csv       data for the ledger pages
   02-carnet/
   03-reserve/
 ```
 
 - **Order** = the numeric prefix of folder and file names (`01-`, `02-`, … `10-` sorts after `9-`).
   Reordering = renaming. The prefix is dropped from ids: `01-echantillons` → section `echantillons`,
-  `02-armes.md` → page `armes` (deep link `/#armes`). Page names must be unique in the whole book.
+  `02-ouvrages-relies.md` → page `ouvrages-relies` (deep link `/#ouvrages-relies`). Page names must be unique in the whole book.
 - Folders starting with `_` or `.` are ignored (handy for drafts).
 - The **title page** (frontispiece + table of contents) is generated; its texts come from `livre.json`.
 - Changing a CSV, a page or `livre.json` only needs a redeploy.
@@ -161,8 +161,8 @@ titre: Potions
 sousTitre: Potions
 icone: round-potion
 resume: In-character introduction.
-donnees: marchandises.csv          # path relative to the section folder (must stay in content/)
-filtre: { colonne: chapitre, valeur: potions }   # optional: only the rows holding this value (or list)
+donnees: catalogue.csv          # path relative to the section folder (must stay in content/)
+filtre: { colonne: chapitre, valeur: mots }   # optional: only the rows holding this value (or list)
 sceau:                             # optional: an engraved stamp per row
   colonne: artisan
   defaut: divers                   # when the cell matches nothing (leave out = no stamp)

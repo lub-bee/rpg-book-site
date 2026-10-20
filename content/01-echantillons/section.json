@@ -5,31 +5,101 @@
   "icone": "coins",
   "surtitre": "Registre d'échantillon · Feuillet {n}",
   "registre": {
-    "donnees": "marchandises.csv",
+    "donnees": "catalogue.csv",
     "sceau": {
       "colonne": "artisan",
-      "defaut": "divers",
+      "defaut": "colporteur",
       "valeurs": {
-        "alchimiste": { "libelle": "Alchimiste", "icone": "fizzing-flask", "couleur": "#2f5b3a", "reconnaitre": ["alchim"] },
-        "forgeron": { "libelle": "Forgeron", "icone": "anvil", "couleur": "#5e2a12", "reconnaitre": ["forge"] },
-        "couturier": { "libelle": "Couturier", "icone": "sewing-needle", "couleur": "#3b3270", "reconnaitre": ["coutur"] },
-        "divers": { "libelle": "Divers", "icone": "two-coins", "couleur": "#7a5a14", "legende": false }
+        "scribe": {
+          "libelle": "Scribe",
+          "icone": "quill-ink",
+          "couleur": "#1f3a5f",
+          "reconnaitre": [
+            "scrib",
+            "plume"
+          ]
+        },
+        "relieur": {
+          "libelle": "Relieur",
+          "icone": "sewing-needle",
+          "couleur": "#5e2a12",
+          "reconnaitre": [
+            "reli"
+          ]
+        },
+        "colporteur": {
+          "libelle": "Colporteur",
+          "icone": "two-coins",
+          "couleur": "#7a5a14",
+          "reconnaitre": [
+            "colpor"
+          ]
+        }
       }
     },
     "colonnes": [
-      { "type": "nom", "titre": "Article", "colonnes": ["fr", "en"] },
-      { "type": "note", "colonne": "note" },
-      { "type": "prix", "titre": "Coût", "colonne": "prod", "ton": "pale", "largeur": 50, "largeurEtroite": 30 },
-      { "type": "prix", "titre": "Plancher", "court": "Bas", "colonne": "min", "largeur": 62, "largeurEtroite": 34, "etendue": true },
-      { "type": "prix", "titre": "Plafond", "court": "Haut", "colonne": "max", "ton": "rouge", "largeur": 62, "largeurEtroite": 34, "etendue": true }
+      {
+        "type": "nom",
+        "titre": "Article",
+        "colonnes": [
+          "fr",
+          "en"
+        ]
+      },
+      {
+        "type": "note",
+        "colonne": "note"
+      },
+      {
+        "type": "prix",
+        "titre": "Coût",
+        "colonne": "prod",
+        "ton": "pale",
+        "largeur": 50,
+        "largeurEtroite": 30
+      },
+      {
+        "type": "prix",
+        "titre": "Plancher",
+        "court": "Bas",
+        "colonne": "min",
+        "largeur": 62,
+        "largeurEtroite": 34,
+        "etendue": true
+      },
+      {
+        "type": "prix",
+        "titre": "Plafond",
+        "court": "Haut",
+        "colonne": "max",
+        "ton": "rouge",
+        "largeur": 62,
+        "largeurEtroite": 34,
+        "etendue": true
+      }
     ],
-    "siVide": { "colonnes": ["min", "max"], "texte": "à négocier" },
+    "siVide": {
+      "colonnes": [
+        "min",
+        "max"
+      ],
+      "texte": "à négocier"
+    },
     "legende": [
-      { "terme": "Coût", "definition": "ce que l'objet coûte à l'atelier" },
-      { "terme": "Plancher", "definition": "jamais une pièce de moins" },
-      { "terme": "Plafond", "definition": "le prix fort, à annoncer d'abord" }
+      {
+        "terme": "Coût",
+        "definition": "ce que coûtent l'encre et le vélin"
+      },
+      {
+        "terme": "Plancher",
+        "definition": "jamais une pièce de moins"
+      },
+      {
+        "terme": "Plafond",
+        "definition": "le prix fort, à annoncer d'abord"
+      }
     ],
-    "decompte": "{n} article{s} consigné{s}",
+    "decompte": "{n} entrée{s} consignée{s}",
     "etendue": ", de {min} à {max} septims",
     "pied": "Prix exprimés en septims d'or"
   }
