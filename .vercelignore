@@ -1,0 +1,6 @@
+.verif
+.env*
+!.env.example
+.next
+node_modules
+*.bak
