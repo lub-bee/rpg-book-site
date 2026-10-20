@@ -1,6 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useId, useState } from 'react'
+
+/** useId, usable as an SVG id (several copies of a lock may share the page while a leaf turns). */
+const useIdSvg = () => useId().replace(/[^a-zA-Z0-9_-]/g, '')
 
 /**
  * Forged-iron look for an SVG shape: a CC0 photo of worn metal (desaturated, darkened), lit as a
@@ -43,14 +46,15 @@ export const PLAQUE_FER =
  * The lock seen from inside the open book: an iron plate on the cover's fore-edge with its bolt.
  * Clicking it slides the bolt back and closes the grimoire (ends the session).
  */
-export function Verrou({ onRefermer }: { onRefermer: () => void }) {
+export function Verrou({ onRefermer, gravure, aide }: { onRefermer: () => void; gravure: string; aide: string }) {
   const [tire, setTire] = useState(false)
+  const id = useIdSvg()
   return (
     <button
       type="button"
       className={`verrou ${tire ? 'tire' : ''}`}
-      title="Refermer le grimoire"
-      aria-label="Refermer le grimoire"
+      title={aide}
+      aria-label={aide}
       disabled={tire}
       onClick={() => {
         setTire(true)
@@ -59,14 +63,14 @@ export function Verrou({ onRefermer }: { onRefermer: () => void }) {
     >
       <svg viewBox="0 0 84 140" aria-hidden>
         <defs>
-          <FiltreFer id="fer-verrou" l={84} h={140} />
-          <FiltreFer id="fer-pene" l={84} h={140} />
-          <linearGradient id="gache-g" x1="0" y1="0" x2="0" y2="1">
+          <FiltreFer id={`${id}-plaque`} l={84} h={140} />
+          <FiltreFer id={`${id}-pene`} l={84} h={140} />
+          <linearGradient id={`${id}-gache`} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#000" />
             <stop offset="100%" stopColor="#1d1611" />
           </linearGradient>
         </defs>
-        <g filter="url(#fer-verrou)">
+        <g filter={`url(#${id}-plaque)`}>
           <path transform="scale(1.1667 1.2069)" d={PLAQUE_FER} fill="#fff" />
           {[
             [15, 23],
@@ -78,9 +82,9 @@ export function Verrou({ onRefermer }: { onRefermer: () => void }) {
           ))}
         </g>
         {/* Groove the bolt slides in */}
-        <rect x="12" y="57" width="60" height="26" rx="4" fill="url(#gache-g)" stroke="#9a9286" strokeOpacity=".3" />
+        <rect x="12" y="57" width="60" height="26" rx="4" fill={`url(#${id}-gache)`} stroke="#9a9286" strokeOpacity=".3" />
         <path d="M13 60H71" stroke="#000" strokeOpacity=".7" strokeWidth="2" />
-        <g className="verrou-pene" filter="url(#fer-pene)">
+        <g className="verrou-pene" filter={`url(#${id}-pene)`}>
           {/* Bolt, pushed out past the edge, and its thumb knob */}
           <rect x="0" y="62" width="60" height="16" rx="3" fill="#fff" />
           <rect x="44" y="50" width="10" height="20" rx="3" fill="#fff" />
@@ -93,8 +97,8 @@ export function Verrou({ onRefermer }: { onRefermer: () => void }) {
         </g>
         {/* Engraved word under the bolt: dark cut, light lower lip */}
         <g className="verrou-grave" fontFamily="var(--f-capitales)" fontSize="11" letterSpacing=".5" textAnchor="middle">
-          <text x="42" y="100.4" fill="#000" fillOpacity=".8">Refermer</text>
-          <text x="42" y="101.2" fill="#cfc6b6" fillOpacity=".78">Refermer</text>
+          <text x="42" y="100.4" fill="#000" fillOpacity=".8">{gravure}</text>
+          <text x="42" y="101.2" fill="#cfc6b6" fillOpacity=".78">{gravure}</text>
         </g>
       </svg>
     </button>
@@ -102,7 +106,8 @@ export function Verrou({ onRefermer }: { onRefermer: () => void }) {
 }
 
 /** Hand-forged iron key, drawn pointing left (viewBox 380×120). */
-export function Cle({ className = 'cle-dessin', id = 'fer-cle' }: { className?: string; id?: string }) {
+export function Cle({ className = 'cle-dessin' }: { className?: string }) {
+  const id = useIdSvg()
   return (
     <svg className={className} viewBox="0 0 380 120" aria-hidden>
       <defs>
@@ -132,21 +137,56 @@ export function Cle({ className = 'cle-dessin', id = 'fer-cle' }: { className?: 
 }
 
 /** Narrow screens: the latch gives way to a small iron key in the header that closes the grimoire. */
-export function CleRefermer({ onRefermer }: { onRefermer: () => void }) {
+export function CleRefermer({ onRefermer, aide }: { onRefermer: () => void; aide: string }) {
   const [tourne, setTourne] = useState(false)
   return (
     <button
       type="button"
       className={`cle-refermer ${tourne ? 'tourne' : ''}`}
-      title="Refermer le grimoire"
-      aria-label="Refermer le grimoire"
+      title={aide}
+      aria-label={aide}
       disabled={tourne}
       onClick={() => {
         setTourne(true)
         setTimeout(onRefermer, 420)
       }}
     >
-      <Cle className="cle-refermer-dessin" id="fer-cle-mini" />
+      <Cle className="cle-refermer-dessin" />
     </button>
+  )
+}
+
+/**
+ * Iron lock plate (the cover's lock, and the lock of a sealed section). Its keyhole is the key's
+ * cross-section at the key's scale (the plate is drawn for a 340px key): the round is the shaft,
+ * the slot below is the bit.
+ */
+export function Serrure({ className = 'serrure' }: { className?: string }) {
+  const id = useIdSvg()
+  return (
+    <svg className={className} viewBox="0 0 84 140" aria-hidden>
+      <defs>
+        <FiltreFer id={`${id}-fer`} l={84} h={140} />
+        <linearGradient id={`${id}-trou`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#000" />
+          <stop offset="100%" stopColor="#15100c" />
+        </linearGradient>
+      </defs>
+      <g filter={`url(#${id}-fer)`}>
+        <path transform="scale(1.1667 1.2069)" d={PLAQUE_FER} fill="#fff" />
+        {[
+          [15, 23],
+          [69, 23],
+          [15, 117],
+          [69, 117],
+        ].map(([x, y]) => (
+          <circle key={`${x}-${y}`} cx={x} cy={y} r="4" fill="#fff" />
+        ))}
+      </g>
+      {/* Keyhole: shaft round (r 16) and bit slot (down to the bit's depth) */}
+      <path d="M37.5 70L36 98H48L46.5 70A16.1 16.1 0 1 0 37.5 70Z" fill={`url(#${id}-trou)`} />
+      <path d="M26 58A16 16 0 0 1 58 58" fill="none" stroke="#000" strokeOpacity=".7" strokeWidth="2" />
+      <path d="M28 64A15 15 0 0 0 56 64" fill="none" stroke="#d8d2c6" strokeOpacity=".22" strokeWidth="1" />
+    </svg>
   )
 }

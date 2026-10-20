@@ -1,7 +1,5 @@
-import { useId } from 'react'
-import type { Artisan } from '@/lib/types'
-import { EMBLEME_TRACE, EMBLEME_VIEWBOX } from '@/lib/embleme'
-import { ARTISANS, ICONES_ARTISANS } from '@/lib/recherche'
+import { useId, type CSSProperties } from 'react'
+import type { Embleme as Trace, Sceau } from '@/lib/types'
 
 /** A game-icons.net glyph (512×512, filled with currentColor). */
 export function Icone({ corps, className }: { corps?: string; className?: string }) {
@@ -9,29 +7,32 @@ export function Icone({ corps, className }: { corps?: string; className?: string
   return <svg className={`icone ${className ?? ''}`} viewBox="0 0 512 512" aria-hidden dangerouslySetInnerHTML={{ __html: corps }} />
 }
 
-export function GlypheArtisan({ artisan, icones }: { artisan: Artisan; icones: Record<string, string> }) {
+/** Engraved stamp of a ledger row (e.g. the craftsman's guild), coloured by the ledger's config. */
+export function GlypheSceau({ sceau, icones }: { sceau?: Sceau; icones: Record<string, string> }) {
+  if (!sceau) return <span className="glyphe" aria-hidden />
   return (
-    <span className={`glyphe glyphe-${artisan}`} title={ARTISANS[artisan]}>
-      <Icone corps={icones[ICONES_ARTISANS[artisan]]} />
-      <span className="visuellement-cache">{ARTISANS[artisan]}</span>
+    <span className="glyphe" style={{ color: sceau.couleur }} title={sceau.libelle}>
+      <Icone corps={icones[sceau.icone]} />
+      <span className="visuellement-cache">{sceau.libelle}</span>
     </span>
   )
 }
 
-/** The caravan's emblem, gilded: gold leaf gradient, a dark tooled outline and a soft relief. */
-export function Embleme({ taille = 48, className }: { taille?: number; className?: string }) {
-  const id = useId().replace(/:/g, '')
-  const [, , l, h] = EMBLEME_VIEWBOX.split(' ').map(Number)
+/** The book's emblem (content/, traced SVG), gilded: gold leaf gradient, a dark tooled outline and a soft relief. */
+export function Embleme({ trace, taille = 48, className, style }: { trace: Trace; taille?: number; className?: string; style?: CSSProperties }) {
+  const id = useId().replace(/[^a-zA-Z0-9_-]/g, '')
+  const [, , l, h] = trace.viewBox.split(/[\s,]+/).map(Number)
   return (
-    <svg className={`embleme ${className ?? ''}`} width={(taille * l) / h} height={taille} viewBox={EMBLEME_VIEWBOX} aria-hidden>
+    <svg className={`embleme ${className ?? ''}`} style={style} width={(taille * l) / h} height={taille} viewBox={trace.viewBox} aria-hidden>
       <defs>
+        {/* Gold leaf: the four colours of livre.json "apparence.dorure". */}
         <linearGradient id={`${id}-or`} x1="0" y1="0" x2="0.35" y2="1">
-          <stop offset="0%" stopColor="#fff2c4" />
-          <stop offset="22%" stopColor="#e9c470" />
-          <stop offset="48%" stopColor="#b8862f" />
-          <stop offset="62%" stopColor="#f2d58c" />
-          <stop offset="80%" stopColor="#9c6f24" />
-          <stop offset="100%" stopColor="#dcb565" />
+          <stop offset="0%" style={{ stopColor: 'var(--dorure-1)' }} />
+          <stop offset="22%" style={{ stopColor: 'var(--dorure-2)' }} />
+          <stop offset="48%" style={{ stopColor: 'var(--dorure-3)' }} />
+          <stop offset="62%" style={{ stopColor: 'color-mix(in srgb, var(--dorure-2) 55%, var(--dorure-1))' }} />
+          <stop offset="80%" style={{ stopColor: 'color-mix(in srgb, var(--dorure-3) 85%, black)' }} />
+          <stop offset="100%" style={{ stopColor: 'var(--dorure-4)' }} />
         </linearGradient>
         <filter id={`${id}-relief`} x="-5%" y="-5%" width="110%" height="110%">
           <feGaussianBlur in="SourceAlpha" stdDeviation="5" result="flou" />
@@ -43,7 +44,7 @@ export function Embleme({ taille = 48, className }: { taille?: number; className
         </filter>
       </defs>
       <path
-        d={EMBLEME_TRACE}
+        d={trace.d}
         fill={`url(#${id}-or)`}
         fillRule="evenodd"
         stroke="#4a3010"

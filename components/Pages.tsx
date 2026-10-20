@@ -1,10 +1,12 @@
 'use client'
 
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
-import type { Livre, Page, PageChapitre } from '@/lib/types'
-import { articleCorrespond, plages } from '@/lib/recherche'
-import { dateTamrielique, prix, romain } from '@/lib/format'
-import { Embleme, Fleuron, GlypheArtisan, Icone, Plume } from './Ornements'
+import { useRouter } from 'next/navigation'
+import type { Livre, Page, PageRegistre, PageScellee } from '@/lib/types'
+import { ligneCorrespond, plages } from '@/lib/recherche'
+import { accorder, dateDuLivre, romain } from '@/lib/format'
+import { Embleme, Fleuron, GlypheSceau, Icone, Plume } from './Ornements'
+import { Cle, Serrure } from './Fer'
 
 export type Ctx = {
   livre: Livre
@@ -21,6 +23,7 @@ export type Ctx = {
 }
 
 const EFFACEMENT_MS = 320
+const ICONE_RESCELLER = 'padlock'
 
 /** Highlights every token of the query in red ink. */
 function Surligne({ texte, requetes }: { texte: string; requetes: string[] }) {
@@ -52,6 +55,7 @@ function Defile({ ctx, className, children }: { ctx: Ctx; className?: string; ch
 }
 
 function CitationFin({ texte }: { texte: string }) {
+  if (!texte) return null
   return (
     <blockquote className="citation-fin">
       <p>{texte}</p>
@@ -63,33 +67,36 @@ function Folio({ n }: { n: number }) {
   return <div className="folio">{romain(n)}</div>
 }
 
-const teinte = (ctx: Ctx, page: Page) => ({ '--teinte': ctx.livre.parties.find((p) => p.id === page.partie)?.couleur } as CSSProperties)
+const sectionDe = (ctx: Ctx, page: Page) => ctx.livre.sections.find((s) => s.id === page.section)
+const teinte = (ctx: Ctx, page: Page) => ({ '--teinte': sectionDe(ctx, page)?.couleur } as CSSProperties)
 
 /* ───────────────────────────── Left pages ───────────────────────────── */
 
 export function PageGauche({ page, ctx, compact = false }: { page: Page; ctx: Ctx; compact?: boolean }) {
+  const icone = ctx.livre.icones[page.icone]
   const corps = (() => {
     switch (page.type) {
       case 'sommaire':
         return <Frontispice ctx={ctx} compact={compact} />
-      case 'chapitre':
-        return <TeteChapitre page={page} ctx={ctx} compact={compact} />
-      case 'note':
+      case 'registre':
+        return <TeteRegistre page={page} ctx={ctx} compact={compact} />
+      case 'notes':
         return (
-          <EnTete surtitre="Pense-bête" titre={page.titre} icone={ctx.livre.icones[page.icone]} compact={compact}>
+          <EnTete surtitre={page.surtitre} titre={page.titre} icone={icone} compact={compact}>
             {page.resume && <p className="intro lettrine">{page.resume}</p>}
-            {page.auteur && <p className="signature">Consigné par {page.auteur}</p>}
+            {page.auteur && <p className="signature">{accorder(ctx.livre.config.textes.signature, { auteur: page.auteur })}</p>}
           </EnTete>
         )
-      case 'avenir':
+      case 'a-venir':
         return (
-          <EnTete
-            surtitre={ctx.livre.parties.find((p) => p.id === page.partie)?.titre ?? ''}
-            titre={page.titre}
-            icone={ctx.livre.icones[page.icone]}
-            compact={compact}
-          >
-            <p className="intro lettrine">{page.intro}</p>
+          <EnTete surtitre={page.surtitre} titre={page.titre} icone={icone} compact={compact}>
+            {page.resume && <p className="intro lettrine">{page.resume}</p>}
+          </EnTete>
+        )
+      case 'scellee':
+        return (
+          <EnTete surtitre={page.surtitre} titre={page.titre} icone={icone} compact={compact}>
+            {sectionDe(ctx, page)?.serrure?.intro && <p className="intro lettrine">{sectionDe(ctx, page)!.serrure!.intro}</p>}
           </EnTete>
         )
     }
@@ -98,6 +105,7 @@ export function PageGauche({ page, ctx, compact = false }: { page: Page; ctx: Ct
   return (
     <div className="contenu gauche-contenu" style={teinte(ctx, page)}>
       {corps}
+      <Resceller page={page} ctx={ctx} />
       <Folio n={ctx.index * 2 + 1} />
     </div>
   )
@@ -120,7 +128,7 @@ function EnTete({
 }) {
   return (
     <header className={`en-tete ${compact ? 'compact' : ''}`}>
-      <div className="surtitre">{surtitre}</div>
+      {surtitre && <div className="surtitre">{surtitre}</div>}
       <div className="titre-ligne">
         {icone && (
           <span className="medaillon" aria-hidden>
@@ -137,31 +145,37 @@ function EnTete({
 }
 
 function Frontispice({ ctx, compact }: { ctx: Ctx; compact: boolean }) {
+  const { config, embleme, consigneLe } = ctx.livre
+  const t = config.pageDeTitre
   return (
     <div className={`frontispice ${compact ? 'compact' : ''}`}>
-      <Embleme taille={160} className="frontispice-embleme" />
-      <div className="frontispice-sur">Grimoire de la</div>
-      <h2 className="frontispice-titre">Caravane des Lunes Itinérantes</h2>
+      <Embleme trace={embleme} taille={160} className="frontispice-embleme" />
+      {t.surTitre && <div className="frontispice-sur">{t.surTitre}</div>}
+      <h2 className="frontispice-titre">{config.titre}</h2>
       <Fleuron />
-      <p className="citation">« Il n&apos;existe rien qu&apos;un bon Khajiit ne saurait vendre. »</p>
-      {!compact && (
-        <p className="frontispice-texte">
-          Registre de la Caravane des Lunes Itinérantes. Qu&apos;on le consulte avant chaque vente, et que jamais d&apos;yeux non
-          Khajiit ne le consultent.
+      {config.devise && <p className="citation">{config.devise}</p>}
+      {!compact && t.texte && <p className="frontispice-texte">{t.texte}</p>}
+      {t.consigne && (
+        <p className="consigne">
+          {accorder(t.consigne, { date: dateDuLivre(consigneLe, { locale: config.locale, fuseau: config.calendrier.fuseau, mois: config.calendrier.mois }) })}
         </p>
       )}
-      <p className="consigne">Prix consignés le {dateTamrielique(ctx.livre.consigneLe)}</p>
-      {!compact && <p className="colophon">Enluminures d&apos;après les graveurs de game-icons.net</p>}
+      {!compact &&
+        config.credits.map((c) => (
+          <p key={c} className="colophon">
+            {c}
+          </p>
+        ))}
     </div>
   )
 }
 
-function TeteChapitre({ page, ctx, compact }: { page: PageChapitre; ctx: Ctx; compact: boolean }) {
-  const surtitre = `Livre des Marchandises · Chapitre ${romain(ctx.livre.pages.filter((p) => p.type === 'chapitre').indexOf(page) + 1).toUpperCase()}`
-  const prixConnus = page.articles.flatMap((a) => [a.min, a.max]).filter((v): v is number => v !== null)
+function TeteRegistre({ page, ctx, compact }: { page: PageRegistre; ctx: Ctx; compact: boolean }) {
+  const t = ctx.livre.config.textes.rechercheLocale
+  const sceaux = page.sceaux.filter((s) => s.legende)
   return (
-    <EnTete surtitre={surtitre} titre={page.titre} sousTitre={page.titreEn} icone={ctx.livre.icones[page.icone]} compact={compact}>
-      {!compact && <p className="intro lettrine">{page.intro}</p>}
+    <EnTete surtitre={page.surtitre} titre={page.titre} sousTitre={page.sousTitre} icone={ctx.livre.icones[page.icone]} compact={compact}>
+      {!compact && page.resume && <p className="intro lettrine">{page.resume}</p>}
       <label className="recherche-locale">
         <Plume className="plume" />
         <input
@@ -171,29 +185,60 @@ function TeteChapitre({ page, ctx, compact }: { page: PageChapitre; ctx: Ctx; co
           tabIndex={ctx.interactif ? 0 : -1}
           onChange={(e) => ctx.setLocale?.(e.target.value)}
           onKeyDown={(e) => e.key === 'Escape' && ctx.setLocale?.('')}
-          placeholder="Chercher en ce chapitre…"
-          aria-label={`Chercher dans le chapitre ${page.titre}`}
+          placeholder={t.placeholder}
+          aria-label={accorder(t.aide, { titre: page.titre })}
         />
       </label>
       {!compact && (
         <>
-          <p className="decompte">
-            {page.articles.length} article{page.articles.length > 1 ? 's' : ''} consigné{page.articles.length > 1 ? 's' : ''}
-            {prixConnus.length > 0 && <>, de {prix(Math.min(...prixConnus))} à {prix(Math.max(...prixConnus))} septims</>}
-          </p>
-          <dl className="legende">
-            <div><dt>Coût</dt><dd>ce que l&apos;objet coûte à l&apos;atelier</dd></div>
-            <div><dt>Plancher</dt><dd>jamais une pièce de moins</dd></div>
-            <div><dt>Plafond</dt><dd>le prix fort, à annoncer d&apos;abord</dd></div>
-          </dl>
-          <div className="legende-sceaux">
-            <span><GlypheArtisan artisan="alchimiste" icones={ctx.livre.icones} /> Alchimiste</span>
-            <span><GlypheArtisan artisan="forgeron" icones={ctx.livre.icones} /> Forgeron</span>
-            <span><GlypheArtisan artisan="couturier" icones={ctx.livre.icones} /> Couturier</span>
-          </div>
+          {page.decompte && <p className="decompte">{page.decompte}</p>}
+          {page.legende.length > 0 && (
+            <dl className="legende">
+              {page.legende.map((l) => (
+                <div key={l.terme}>
+                  <dt>{l.terme}</dt>
+                  <dd>{l.definition}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
+          {sceaux.length > 0 && (
+            <div className="legende-sceaux">
+              {sceaux.map((s) => (
+                <span key={s.cle}>
+                  <GlypheSceau sceau={s} icones={ctx.livre.icones} /> {s.libelle}
+                </span>
+              ))}
+            </div>
+          )}
         </>
       )}
     </EnTete>
+  )
+}
+
+/** Small engraved action at the foot of an unlocked private section's pages: seals it again. */
+function Resceller({ page, ctx }: { page: Page; ctx: Ctx }) {
+  const router = useRouter()
+  const [fait, setFait] = useState(false)
+  const section = sectionDe(ctx, page)
+  if (!section?.prive || !section.ouverte || !section.serrure) return null
+  return (
+    <button
+      type="button"
+      className="resceller"
+      tabIndex={ctx.interactif ? 0 : -1}
+      disabled={fait || !ctx.interactif}
+      title={section.serrure.aideResceller}
+      onClick={async () => {
+        setFait(true)
+        await fetch(`/api/section?section=${encodeURIComponent(section.id)}`, { method: 'DELETE' }).catch(() => null)
+        router.refresh()
+      }}
+    >
+      <Icone corps={ctx.livre.icones[ICONE_RESCELLER]} className="resceller-icone" />
+      <span>{section.serrure.resceller}</span>
+    </button>
   )
 }
 
@@ -209,11 +254,16 @@ export function PageDroite({ page, ctx, integre = false }: { page: Page; ctx: Ct
             <CitationFin texte={page.citation} />
           </>
         )
-      case 'chapitre':
-        return <ListeArticles page={page} ctx={ctx} />
-      case 'note':
-        return <div className="prose" dangerouslySetInnerHTML={{ __html: page.html }} />
-      case 'avenir':
+      case 'registre':
+        return <ListeRegistre page={page} ctx={ctx} />
+      case 'notes':
+        return (
+          <>
+            <div className="prose" dangerouslySetInnerHTML={{ __html: page.html }} />
+            <CitationFin texte={page.citation} />
+          </>
+        )
+      case 'a-venir':
         return (
           <div className="attente">
             <div className="griffonnages" aria-hidden>
@@ -223,6 +273,8 @@ export function PageDroite({ page, ctx, integre = false }: { page: Page; ctx: Ct
             <CitationFin texte={page.citation} />
           </div>
         )
+      case 'scellee':
+        return <SerrureSection page={page} ctx={ctx} />
     }
   })()
   if (integre) return corps
@@ -241,6 +293,7 @@ export function PageUnique({ page, ctx }: { page: Page; ctx: Ctx }) {
       <Defile ctx={ctx}>
         <PageGauche page={page} ctx={ctx} compact />
         <PageDroite page={page} ctx={ctx} integre />
+        <Resceller page={page} ctx={ctx} />
         <Folio n={ctx.index + 1} />
       </Defile>
     </div>
@@ -248,18 +301,18 @@ export function PageUnique({ page, ctx }: { page: Page; ctx: Ctx }) {
 }
 
 function TableDesMatieres({ ctx }: { ctx: Ctx }) {
-  const { parties, pages } = ctx.livre
+  const { sections, pages, config } = ctx.livre
   return (
-    <nav className="table-matieres" aria-label="Table des matières">
-      <h3 className="titre-table">Table des matières</h3>
-      {parties
-        .filter((p) => p.id !== 'sommaire')
-        .map((partie) => (
-          <section key={partie.id}>
-            <h4 style={{ color: partie.couleur }}>{partie.titre}</h4>
+    <nav className="table-matieres" aria-label={config.sommaire.tableDesMatieres}>
+      <h3 className="titre-table">{config.sommaire.tableDesMatieres}</h3>
+      {sections
+        .filter((s) => s.id !== 'sommaire')
+        .map((section) => (
+          <section key={section.id}>
+            <h4 style={{ color: section.couleur }}>{section.titre}</h4>
             <ol>
               {pages.map((p, i) =>
-                p.partie !== partie.id ? null : (
+                p.section !== section.id ? null : (
                   <li key={p.id}>
                     <button type="button" tabIndex={ctx.interactif ? 0 : -1} onClick={() => ctx.aller?.(i)}>
                       <span className="entree">{p.titre}</span>
@@ -276,18 +329,13 @@ function TableDesMatieres({ ctx }: { ctx: Ctx }) {
   )
 }
 
-const VIDES = [
-  "Khajiit a beau fouiller ses sacoches… rien de tel en ce chapitre.",
-  "Aucun article ne répond à ce nom, ami. Peut-être sous une autre lune ?",
-  "Le registre reste muet. Essaie un autre mot, ou une autre langue.",
-]
-
-function ListeArticles({ page, ctx }: { page: PageChapitre; ctx: Ctx }) {
+function ListeRegistre({ page, ctx }: { page: PageRegistre; ctx: Ctx }) {
   // The list shown lags behind the query: the old ink fades, then the page is rewritten.
   const [montre, setMontre] = useState({ requete: ctx.requete, locale: ctx.locale })
   const [efface, setEfface] = useState(false)
   const [generation, setGeneration] = useState(0)
   const liste = useRef<HTMLDivElement>(null)
+  const vides = ctx.livre.config.textes.rechercheLocale.vides
 
   useEffect(() => {
     if (!ctx.interactif) return
@@ -305,52 +353,158 @@ function ListeArticles({ page, ctx }: { page: PageChapitre; ctx: Ctx }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ctx.requete, ctx.locale, ctx.interactif])
 
-  const filtres = page.articles.filter((a) => articleCorrespond(a, montre.requete) && articleCorrespond(a, montre.locale))
+  const filtres = page.lignes.filter((l) => ligneCorrespond(l, montre.requete) && ligneCorrespond(l, montre.locale))
   const requetes = [montre.requete, montre.locale].filter(Boolean)
 
   useEffect(() => {
     if (!ctx.interactif || !ctx.cible || !liste.current) return
-    const el = liste.current.querySelector<HTMLElement>(`[data-article="${ctx.cible}"]`)
+    const el = liste.current.querySelector<HTMLElement>(`[data-ligne="${ctx.cible}"]`)
     el?.scrollIntoView({ block: 'center', behavior: 'smooth' })
   }, [ctx.cible, ctx.interactif, generation])
 
+  // Grid: [stamp] label, dot leaders, then one track per value column (widths from the page's config).
+  const avecSceau = page.sceaux.length > 0
+  const grille = (etroit: boolean) =>
+    `${avecSceau ? (etroit ? '16px ' : '22px ') : ''}minmax(0, max-content) minmax(${etroit ? 6 : 18}px, 1fr)${page.colonnes
+      .map((c) => ` ${etroit ? c.largeurEtroite : c.largeur}px`)
+      .join('')}`
+  const finLibelle = avecSceau ? 4 : 3
+  const style = { '--grille': grille(false), '--grille-etroite': grille(true) } as CSSProperties
+
   return (
-    <div className="registre">
+    <div className="registre" style={style}>
       <div className="registre-entete" role="row">
-        <span className="col-article">Article</span>
-        <span>Coût</span>
-        <span><span className="long">Plancher</span><span className="court">Bas</span></span>
-        <span><span className="long">Plafond</span><span className="court">Haut</span></span>
+        <span className="col-libelle" style={{ gridColumn: `1 / ${finLibelle}` }}>
+          <span className="long">{page.titreLibelle}</span>
+          <span className="court">{page.courtLibelle}</span>
+        </span>
+        {page.colonnes.map((c, k) => (
+          <span key={k} className="col-valeur">
+            <span className="long">{c.titre}</span>
+            <span className="court">{c.court}</span>
+          </span>
+        ))}
       </div>
       <div ref={liste} key={generation} className={`registre-corps ${efface ? 'efface' : ''}`}>
-        {filtres.map((a, i) => (
+        {filtres.map((l, i) => (
           <div
-            key={a.id}
-            data-article={a.id}
-            className={`ligne ${generation > 0 ? 'ecrit' : ''} ${ctx.cible === a.id ? 'cible' : ''}`}
-            style={{ '--i': Math.min(i, 16) } as React.CSSProperties}
+            key={l.id}
+            data-ligne={l.id}
+            className={`ligne ${generation > 0 ? 'ecrit' : ''} ${ctx.cible === l.id ? 'cible' : ''}`}
+            style={{ '--i': Math.min(i, 16) } as CSSProperties}
           >
-            <GlypheArtisan artisan={a.artisan} icones={ctx.livre.icones} />
+            {avecSceau && <GlypheSceau sceau={page.sceaux.find((s) => s.cle === l.sceau)} icones={ctx.livre.icones} />}
             <div className="noms">
-              <span className="nom-fr"><Surligne texte={a.fr} requetes={requetes} /></span>
-              <span className="nom-en"><Surligne texte={a.en} requetes={requetes} /></span>
-              {a.note && <span className="note-article">{a.note}</span>}
+              <span className="nom-fr"><Surligne texte={l.libelle} requetes={requetes} /></span>
+              {l.libelle2 && <span className="nom-en"><Surligne texte={l.libelle2} requetes={requetes} /></span>}
+              {l.notes.map((n, k) => (
+                <span key={k} className="note-article">
+                  <Surligne texte={n} requetes={requetes} />
+                </span>
+              ))}
             </div>
             <span className="points-conduite" aria-hidden />
-            {a.min === null && a.max === null ? (
-              <span className="a-negocier">à négocier</span>
+            {l.vide ? (
+              <span className="si-vide" style={{ gridColumn: `${finLibelle} / -1` }}>
+                {page.siVide}
+              </span>
             ) : (
-              <>
-                <span className="prix prix-cout">{prix(a.prod)}</span>
-                <span className="prix prix-min">{prix(a.min)}</span>
-                <span className="prix prix-max">{prix(a.max)}</span>
-              </>
+              page.colonnes.map((c, k) => (
+                <span key={k} className={`valeur valeur-${c.genre} ton-${c.ton}`}>
+                  {c.genre === 'texte' ? <Surligne texte={l.valeurs[k]} requetes={requetes} /> : l.valeurs[k]}
+                </span>
+              ))
             )}
           </div>
         ))}
-        {filtres.length === 0 && <p className={`vide ${generation > 0 ? 'ecrit' : ''}`}>{VIDES[requetes.join('').length % VIDES.length]}</p>}
+        {filtres.length === 0 && <p className={`vide ${generation > 0 ? 'ecrit' : ''}`}>{vides[requetes.join('').length % vides.length]}</p>}
       </div>
-      <p className="registre-pied">Prix exprimés en septims d&apos;or</p>
+      {page.pied && <p className="registre-pied">{page.pied}</p>}
+      <CitationFin texte={page.citation} />
+    </div>
+  )
+}
+
+/* ───────────────────────────── Sealed pages ───────────────────────────── */
+
+type EtatSerrure = 'repos' | 'essai' | 'refus' | 'ouvert'
+
+/**
+ * A page of a private section the reader has not unlocked: the same iron lock and key as the cover.
+ * The right word sets the section's signed cookie; the page then asks the server for the book again,
+ * which now sends the section's real pages.
+ */
+function SerrureSection({ page, ctx }: { page: PageScellee; ctx: Ctx }) {
+  const router = useRouter()
+  const section = sectionDe(ctx, page)
+  const t = section?.serrure
+  const [motDePasse, setMotDePasse] = useState('')
+  const [message, setMessage] = useState<string | null>(null)
+  const [etat, setEtat] = useState<EtatSerrure>('repos')
+  const champ = useRef<HTMLInputElement>(null)
+  if (!section || !t) return null
+
+  const tourner = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (etat !== 'repos' || !ctx.interactif) return
+    if (!motDePasse.trim()) {
+      champ.current?.focus()
+      return
+    }
+    setEtat('essai')
+    setMessage(null)
+    const [rep] = await Promise.all([
+      fetch('/api/section', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ section: section.id, motDePasse }),
+      }).catch(() => null),
+      new Promise((r) => setTimeout(r, 500)), // let the key reach the lock
+    ])
+    if (rep?.ok) {
+      setEtat('ouvert')
+      setTimeout(() => router.refresh(), 950)
+      return
+    }
+    const corps = rep ? ((await rep.json().catch(() => ({}))) as { message?: string }) : {}
+    setEtat('refus')
+    setMessage(corps.message || t.coincee)
+    setTimeout(() => {
+      setEtat('repos')
+      champ.current?.select()
+    }, 900)
+  }
+
+  return (
+    <div className={`serrure-section etat-${etat}`}>
+      <div className="serrure-section-scene">
+        <div className="serrure-section-plaque">
+          <Serrure />
+        </div>
+        <div className="serrure-section-fourreau">
+          <form className="cle" onSubmit={tourner}>
+            <Cle />
+            <input
+              ref={champ}
+              className="cle-tige"
+              type="password"
+              value={ctx.interactif ? motDePasse : ''}
+              onChange={(e) => setMotDePasse(e.target.value)}
+              placeholder={t.placeholder}
+              autoComplete="off"
+              readOnly={!ctx.interactif}
+              tabIndex={ctx.interactif ? 0 : -1}
+              disabled={etat !== 'repos'}
+              aria-label={t.aide}
+            />
+            <button type="submit" className="cle-anneau" title={t.tourner} aria-label={t.tourner} tabIndex={ctx.interactif ? 0 : -1} disabled={etat !== 'repos'} />
+          </form>
+        </div>
+      </div>
+      <p className="serrure-section-message" role="status">
+        {message}
+      </p>
+      <CitationFin texte={t.citation} />
     </div>
   )
 }

@@ -1,18 +1,4 @@
-import type { Article, Artisan } from './types'
-
-export const ARTISANS: Record<Artisan, string> = {
-  alchimiste: 'Alchimiste',
-  forgeron: 'Forgeron',
-  couturier: 'Couturier',
-  divers: 'Divers',
-}
-
-export const ICONES_ARTISANS: Record<Artisan, string> = {
-  alchimiste: 'fizzing-flask',
-  forgeron: 'anvil',
-  couturier: 'sewing-needle',
-  divers: 'two-coins',
-}
+import type { Ligne } from './types'
 
 export function normaliser(s: string): string {
   return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
@@ -22,10 +8,10 @@ export function jetons(requete: string): string[] {
   return normaliser(requete).split(/\s+/).filter(Boolean)
 }
 
-export function articleCorrespond(a: Article, requete: string): boolean {
+export function ligneCorrespond(l: Ligne, requete: string): boolean {
   const js = jetons(requete)
   if (!js.length) return true
-  const foin = normaliser(`${a.fr} ${a.en} ${ARTISANS[a.artisan]} ${a.note}`)
+  const foin = normaliser(l.texte)
   return js.every((j) => foin.includes(j))
 }
 

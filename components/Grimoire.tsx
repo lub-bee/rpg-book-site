@@ -1,15 +1,16 @@
 'use client'
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
-import type { Article, Livre, Page, PartieId } from '@/lib/types'
-import { articleCorrespond, compterDans, jetons, plages } from '@/lib/recherche'
+import type { Ligne, Livre, Page } from '@/lib/types'
+import { compterDans, jetons, ligneCorrespond, plages } from '@/lib/recherche'
+import { accorder } from '@/lib/format'
 import { PageDroite, PageGauche, PageUnique, type Ctx } from './Pages'
 import { CoinLaiton, Embleme, Icone, Plume } from './Ornements'
 import { animerFeuillet, animerPortee, Feuillet } from './Feuillet'
 import { CleRefermer, Verrou } from './Fer'
 
 type Tourne = { de: number; vers: number; manuel: boolean }
-type Resultat = { i: number; page: Page; total: number; articles: Article[] }
+type Resultat = { i: number; page: Page; total: number; lignes: Ligne[] }
 type Geste = {
   id: number
   x0: number
@@ -64,7 +65,8 @@ function Surligne({ texte, requete }: { texte: string; requete: string }) {
 }
 
 export default function Grimoire({ livre }: { livre: Livre }) {
-  const { pages, parties, icones } = livre
+  const { pages, sections, icones, config, embleme } = livre
+  const t = config.textes
   const [index, setIndex] = useState(0)
   const [tourne, setTourne] = useState<Tourne | null>(null)
   const enAttente = useRef<number | null>(null)
@@ -297,13 +299,13 @@ export default function Grimoire({ livre }: { livre: Livre }) {
   const resultats = useMemo((): Resultat[] => {
     if (!jetons(requete).length) return []
     return pages.flatMap((p, i): Resultat[] => {
-      if (p.type === 'chapitre') {
-        const articles = p.articles.filter((a) => articleCorrespond(a, requete))
-        return articles.length ? [{ i, page: p, total: articles.length, articles }] : []
+      if (p.type === 'registre') {
+        const lignes = p.lignes.filter((l) => ligneCorrespond(l, requete))
+        return lignes.length ? [{ i, page: p, total: lignes.length, lignes }] : []
       }
-      if (p.type === 'note') {
+      if (p.type === 'notes') {
         const total = compterDans(p.texte, requete)
-        return total ? [{ i, page: p, total, articles: [] }] : []
+        return total ? [{ i, page: p, total, lignes: [] }] : []
       }
       return []
     })
@@ -356,9 +358,10 @@ export default function Grimoire({ livre }: { livre: Livre }) {
   }
 
   const destination = tourne?.vers ?? index
-  const partieActive: PartieId = pages[destination].partie
-  const partieOnglets: PartieId = partieActive === 'sommaire' ? 'marchandises' : partieActive
-  const onglets = pages.map((p, i) => ({ p, i })).filter(({ p }) => p.partie === partieOnglets)
+  const sectionActive = pages[destination].section
+  // On the title page, the tabs of the first section are shown.
+  const sectionOnglets = sectionActive === 'sommaire' ? sections[1]?.id : sectionActive
+  const onglets = pages.map((p, i) => ({ p, i })).filter(({ p }) => p.section === sectionOnglets)
   const avant = tourne ? tourne.vers > tourne.de : true
 
   const voletsDoubles = () => {
@@ -393,10 +396,10 @@ export default function Grimoire({ livre }: { livre: Livre }) {
     <div className={`scene ${tourne?.manuel ? 'en-tourne' : ''}`}>
       <header className="entete">
         <div className="blason">
-          <Embleme taille={64} className="embleme-entete" />
+          <Embleme trace={embleme} taille={64} className="embleme-entete" style={{ transform: `rotate(${config.embleme.rotationEntete}deg)` }} />
           <div>
-            <h1>Caravane des Lunes Itinérantes</h1>
-            <p>Grimoire des marchands</p>
+            <h1>{config.titre}</h1>
+            {config.sousTitre && <p>{config.sousTitre}</p>}
           </div>
         </div>
 
@@ -425,8 +428,8 @@ export default function Grimoire({ livre }: { livre: Livre }) {
                 e.currentTarget.blur()
               }
             }}
-            placeholder="Chercher dans tout le grimoire (FR ou EN)…"
-            aria-label="Chercher dans tout le grimoire"
+            placeholder={t.recherche.placeholder}
+            aria-label={t.recherche.aide}
           />
           {requete && saisie.trim() === requete && (
             <button
@@ -438,7 +441,7 @@ export default function Grimoire({ livre }: { livre: Livre }) {
             >
               {(() => {
                 const n = resultats.reduce((t, r) => t + r.total, 0)
-                return n ? `${n} trouvaille${n > 1 ? 's' : ''}` : 'rien'
+                return n ? accorder(t.recherche.trouvailles, { n }) : t.recherche.rien
               })()}{' '}
               ▾
             </button>
@@ -447,7 +450,7 @@ export default function Grimoire({ livre }: { livre: Livre }) {
             <button
               type="button"
               className="effacer"
-              aria-label="Effacer la recherche"
+              aria-label={t.recherche.effacer}
               onClick={() => {
                 setSaisie('')
                 setRequete('')
@@ -459,19 +462,16 @@ export default function Grimoire({ livre }: { livre: Livre }) {
           {indexOuvert && requete && (
             <div className="index-recherche" role="listbox">
               {resultats.length === 0 ? (
-                <p className="index-vide">Khajiit ne connaît aucun article de ce nom… pas encore.</p>
+                <p className="index-vide">{t.recherche.vide}</p>
               ) : (
                 resultats.map((r) => (
                   <section key={r.page.id}>
                     <button type="button" className="index-page" onMouseDown={(e) => e.preventDefault()} onClick={() => aller(r.i)}>
                       <Icone corps={icones[r.page.icone]} />
                       <span>{r.page.titre}</span>
-                      <span className="index-total">
-                        {r.total} {r.page.type === 'note' ? 'mention' : 'article'}
-                        {r.total > 1 ? 's' : ''}
-                      </span>
+                      <span className="index-total">{accorder(r.page.type === 'notes' ? t.recherche.mentions : t.recherche.lignes, { n: r.total })}</span>
                     </button>
-                    {r.articles.slice(0, 6).map((a) => (
+                    {r.lignes.slice(0, 6).map((a) => (
                       <button
                         type="button"
                         key={a.id}
@@ -483,14 +483,16 @@ export default function Grimoire({ livre }: { livre: Livre }) {
                         }}
                       >
                         <span>
-                          <Surligne texte={a.fr} requete={requete} />
+                          <Surligne texte={a.libelle} requete={requete} />
                         </span>
-                        <em>
-                          <Surligne texte={a.en} requete={requete} />
-                        </em>
+                        {a.libelle2 && (
+                          <em>
+                            <Surligne texte={a.libelle2} requete={requete} />
+                          </em>
+                        )}
                       </button>
                     ))}
-                    {r.articles.length > 6 && <div className="index-plus">et {r.articles.length - 6} autres…</div>}
+                    {r.lignes.length > 6 && <div className="index-plus">{accorder(t.recherche.autres, { n: r.lignes.length - 6 })}</div>}
                   </section>
                 ))
               )}
@@ -498,18 +500,18 @@ export default function Grimoire({ livre }: { livre: Livre }) {
           )}
         </div>
 
-        <CleRefermer onRefermer={refermer} />
+        <CleRefermer onRefermer={refermer} aide={t.refermer.aide} />
       </header>
 
       <main className={`livre-zone ${etroit === null ? 'en-attente' : ''}`}>
-        <nav className="rubans" aria-label="Livres du grimoire">
-          {parties.map((p) => (
+        <nav className="rubans" aria-label={t.navigation.rubans}>
+          {sections.map((p) => (
             <button
               key={p.id}
               type="button"
-              className={`ruban ${partieActive === p.id ? 'actif' : ''}`}
+              className={`ruban ${sectionActive === p.id ? 'actif' : ''}`}
               style={{ '--c': p.couleur } as CSSProperties}
-              onClick={() => aller(pages.findIndex((pg) => pg.partie === p.id))}
+              onClick={() => aller(pages.findIndex((pg) => pg.section === p.id))}
             >
               <Icone corps={icones[p.icone]} className="ruban-icone" />
               <span className="ruban-nom">{p.court}</span>
@@ -517,7 +519,7 @@ export default function Grimoire({ livre }: { livre: Livre }) {
           ))}
         </nav>
 
-        <nav className="onglets" aria-label="Chapitres">
+        <nav className="onglets" aria-label={t.navigation.onglets}>
           {onglets.map(({ p, i }) => (
             <button
               key={p.id}
@@ -533,7 +535,7 @@ export default function Grimoire({ livre }: { livre: Livre }) {
         </nav>
 
         <div className="couverture">
-          <Verrou onRefermer={refermer} />
+          <Verrou onRefermer={refermer} gravure={t.refermer.gravure} aide={t.refermer.aide} />
           <CoinLaiton className="hg" />
           <CoinLaiton className="hd" />
           <CoinLaiton className="bg" />
@@ -580,16 +582,16 @@ export default function Grimoire({ livre }: { livre: Livre }) {
             <button
               type="button"
               className="coin coin-gauche"
-              aria-label="Page précédente"
-              title="Tirer ou cliquer pour revenir en arrière"
+              aria-label={t.coins.precedente}
+              title={t.coins.aidePrecedente}
               disabled={destination === 0}
               onClick={() => !clicIgnore.current && aller(destination - 1)}
             />
             <button
               type="button"
               className="coin coin-droit"
-              aria-label="Page suivante"
-              title="Tirer ou cliquer pour tourner la page"
+              aria-label={t.coins.suivante}
+              title={t.coins.aideSuivante}
               disabled={destination === pages.length - 1}
               onClick={() => !clicIgnore.current && aller(destination + 1)}
             />

@@ -1,29 +1,85 @@
-export type Artisan = 'alchimiste' | 'forgeron' | 'couturier' | 'divers'
+/* Shapes of the book as sent to the browser. Built by lib/contenu.ts from content/. */
 
-export type Article = {
+import type { Config } from './config'
+
+export type TextesSectionPrivee = Config['sectionPrivee']
+
+/** One section of the book = one ribbon. The generated title page has its own section (`sommaire`). */
+export type Section = {
   id: string
-  fr: string
-  en: string
-  prod: number | null
-  min: number | null
-  max: number | null
-  artisan: Artisan
-  note: string
+  titre: string
+  court: string
+  couleur: string
+  icone: string
+  /** Private section (its pages are sealed until the right word is given). */
+  prive: boolean
+  /** Private section the reader has unlocked (offers the "re-seal" action). */
+  ouverte: boolean
+  /** Lock wording of a private section. */
+  serrure: TextesSectionPrivee | null
 }
 
-export type PartieId = 'sommaire' | 'marchandises' | 'pense-betes' | 'missives' | 'caravane'
-
-export type Partie = { id: PartieId; titre: string; court: string; couleur: string; icone: string }
-
 /** `icone` is a game-icons.net name, resolved to its SVG body in `Livre.icones`. */
-type Base = { id: string; partie: PartieId; titre: string; court: string; icone: string }
+type Base = { id: string; section: string; titre: string; court: string; icone: string; surtitre: string }
 
-/** `citation`: closing quote at the foot of the right page. */
+/** Value of the stamp column of a ledger (e.g. the craftsman's guild). */
+export type Sceau = { cle: string; libelle: string; icone: string; couleur: string; legende: boolean }
+
+/** A displayed value column of a ledger, resolved for rendering. */
+export type ColonneAffichee = {
+  titre: string
+  court: string
+  genre: 'prix' | 'fourchette' | 'texte'
+  ton: 'normal' | 'pale' | 'rouge'
+  largeur: number
+  largeurEtroite: number
+}
+
+/** A ledger row, formatted on the server. */
+export type Ligne = {
+  id: string
+  sceau: string | null
+  libelle: string
+  libelle2: string
+  notes: string[]
+  /** One formatted cell per value column. */
+  valeurs: string[]
+  /** Every value cell watched by `siVide` is empty: the row shows the page's `siVide` wording instead. */
+  vide: boolean
+  /** Haystack for the searches. */
+  texte: string
+}
+
 export type PageSommaire = Base & { type: 'sommaire'; citation: string }
-export type PageChapitre = Base & { type: 'chapitre'; titreEn: string; intro: string; articles: Article[] }
-export type PageNote = Base & { type: 'note'; resume: string; auteur: string; html: string; texte: string }
-export type PageAvenir = Base & { type: 'avenir'; intro: string; attente: string; citation: string }
+export type PageNotes = Base & { type: 'notes'; resume: string; auteur: string; html: string; citation: string; texte: string }
+export type PageRegistre = Base & {
+  type: 'registre'
+  sousTitre: string
+  resume: string
+  titreLibelle: string
+  courtLibelle: string
+  colonnes: ColonneAffichee[]
+  lignes: Ligne[]
+  sceaux: Sceau[]
+  siVide: string
+  legende: { terme: string; definition: string }[]
+  decompte: string
+  pied: string
+  citation: string
+}
+export type PageAVenir = Base & { type: 'a-venir'; resume: string; attente: string; citation: string }
+/** A page of a private section the reader has not unlocked: only its title, label and icon are sent. */
+export type PageScellee = Base & { type: 'scellee' }
 
-export type Page = PageSommaire | PageChapitre | PageNote | PageAvenir
+export type Page = PageSommaire | PageNotes | PageRegistre | PageAVenir | PageScellee
 
-export type Livre = { parties: Partie[]; pages: Page[]; consigneLe: string; icones: Record<string, string> }
+export type Embleme = { viewBox: string; d: string }
+
+export type Livre = {
+  config: Config
+  sections: Section[]
+  pages: Page[]
+  consigneLe: string
+  embleme: Embleme
+  icones: Record<string, string>
+}

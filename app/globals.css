@@ -14,6 +14,17 @@
   --encre-pale: #876a47;
   --encre-rouge: #8e1f14;
   --surligne: rgba(178, 43, 24, 0.13);
+  /* Gold leaf (livre.json "apparence.dorure"): highlight, light gold, dark gold, reflected light. */
+  --dorure-1: #fff0bf;
+  --dorure-2: #e3b964;
+  --dorure-3: #a87a2c;
+  --dorure-4: #e9c878;
+  --dorure: linear-gradient(180deg, var(--dorure-1) 0%, var(--dorure-2) 45%, var(--dorure-3) 70%, var(--dorure-4) 100%);
+  /* Photo textures (livre.json "apparence.table" / "apparence.cuir") and the tint laid over the leather. */
+  --texture-table: url('/textures/table.jpg');
+  --texture-cuir: url('/textures/cuir.jpg');
+  --voile-cuir-1: rgba(70, 24, 8, 0.3);
+  --voile-cuir-2: rgba(36, 10, 3, 0.42);
   --h-livre: min(74vh, 790px);
   --f-gothique: var(--font-gothique), 'Old English Text MT', serif;
   --f-texte: var(--font-texte), 'Iowan Old Style', Georgia, serif;
@@ -41,7 +52,7 @@ body {
   background-image:
     radial-gradient(ellipse 75% 60% at 50% 42%, rgba(255, 160, 60, 0.20), transparent 72%),
     linear-gradient(180deg, rgba(18, 9, 3, 0.42), rgba(10, 5, 2, 0.6)),
-    url('/textures/table.jpg');
+    var(--texture-table);
   background-size: auto, auto, 1024px 1024px;
   color: var(--parchemin);
   font-family: var(--f-texte);
@@ -117,8 +128,8 @@ mark { background: var(--surligne); color: var(--encre-rouge); border-radius: 2p
 
 .blason { display: flex; align-items: center; gap: 12px; }
 .blason .embleme { flex: none; filter: drop-shadow(0 2px 1px rgba(0, 0, 0, 0.7)) drop-shadow(0 0 10px rgba(232, 180, 90, 0.3)); }
-/* In the page header the emblem lies on its side (rotated a quarter turn clockwise). */
-.embleme-entete { transform: rotate(90deg); margin: 0 10px 0 6px; }
+/* In the page header the emblem may lie on its side (livre.json "embleme.rotationEntete", set inline). */
+.embleme-entete { margin: 0 10px 0 6px; }
 .frontispice-embleme path { stroke-opacity: 0.85; }
 .blason h1 {
   margin: 0;
@@ -126,7 +137,7 @@ mark { background: var(--surligne); color: var(--encre-rouge); border-radius: 2p
   font-weight: 400;
   font-size: 32px;
   line-height: 1;
-  background: linear-gradient(180deg, #fff0bf 0%, #e3b964 45%, #a87a2c 70%, #e9c878 100%);
+  background: var(--dorure);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -254,7 +265,7 @@ mark { background: var(--surligne); color: var(--encre-rouge); border-radius: 2p
   pointer-events: none;
   border-radius: 6px 10px 10px 6px;
 }
-.couverture::before { inset: 6px; border: 1.5px solid rgba(214, 174, 90, 0.6); box-shadow: 0 1px 0 rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(0, 0, 0, 0.4); }
+.couverture::before { inset: 6px; border: 1.5px solid color-mix(in srgb, var(--dorure-2) 60%, transparent); box-shadow: 0 1px 0 rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(0, 0, 0, 0.4); }
 .couverture::after { inset: 10px; border: 1px solid rgba(0, 0, 0, 0.35); box-shadow: 0 1px 0 rgba(255, 220, 180, 0.08); }
 
 /* Iron latch on the left edge of the open book (the lock seen from inside); clicking it closes the grimoire. */
@@ -671,7 +682,8 @@ mark { background: var(--surligne); color: var(--encre-rouge); border-radius: 2p
 .registre { display: flex; flex-direction: column; min-height: 100%; }
 .registre-entete, .ligne {
   display: grid;
-  grid-template-columns: 22px minmax(0, max-content) minmax(18px, 1fr) 50px 62px 62px;
+  /* Tracks built from the page's columns (--grille / --grille-etroite set inline). */
+  grid-template-columns: var(--grille);
   column-gap: 8px;
 }
 .registre-entete {
@@ -688,8 +700,7 @@ mark { background: var(--surligne); color: var(--encre-rouge); border-radius: 2p
   color: var(--encre-rouge);
   border-bottom: 3px double rgba(142, 31, 20, 0.5);
 }
-.registre-entete .col-article { grid-column: 1 / 4; }
-.registre-entete span:not(.col-article) { text-align: right; }
+.registre-entete .col-valeur { text-align: right; }
 .registre-entete .court { display: none; }
 
 .registre-corps { flex: 1; padding-top: 4px; }
@@ -714,19 +725,17 @@ mark { background: var(--surligne); color: var(--encre-rouge); border-radius: 2p
   background-repeat: repeat-x;
   background-position: right center;
 }
-.prix { text-align: right; font-size: 18px; line-height: 1.25; font-variant-numeric: tabular-nums lining-nums; }
-.prix-cout { color: var(--encre-pale); font-size: 16px; padding-top: 2px; }
-.prix-max { color: var(--encre-rouge); }
-.a-negocier { grid-column: 4 / 7; text-align: right; font-style: italic; color: var(--encre-rouge); line-height: 1.25; }
+.valeur { text-align: right; font-size: 18px; line-height: 1.25; font-variant-numeric: tabular-nums lining-nums; }
+.valeur-fourchette { white-space: nowrap; }
+.valeur-texte { font-size: 16px; font-style: italic; padding-top: 2px; }
+.valeur.ton-pale { color: var(--encre-pale); font-size: 16px; padding-top: 2px; }
+.valeur.ton-rouge { color: var(--encre-rouge); }
+.si-vide { text-align: right; font-style: italic; color: var(--encre-rouge); line-height: 1.25; }
 .vide { padding: 30px 10px; text-align: center; font-style: italic; font-size: 18px; color: var(--encre-douce); }
 .registre-pied { margin: 14px 0 2px; text-align: center; font-family: var(--f-capitales); letter-spacing: 0.1em; font-size: 13px; color: var(--encre-pale); }
 
 .glyphe { display: inline-flex; width: 20px; height: 20px; margin-top: 2px; }
 .glyphe .icone { width: 100%; height: 100%; }
-.glyphe-alchimiste { color: #2f5b3a; }
-.glyphe-forgeron { color: #5e2a12; }
-.glyphe-couturier { color: #3b3270; }
-.glyphe-divers { color: #7a5a14; }
 .legende-sceaux .glyphe { margin-top: 0; width: 18px; height: 18px; }
 
 .ligne.cible { animation: dorure 2.4s ease both; }
@@ -850,14 +859,14 @@ mark { background: var(--surligne); color: var(--encre-rouge); border-radius: 2p
   .onglet:hover, .onglet:focus-visible, .onglet.actif { width: auto; }
   .onglet.trouve::after { left: 3px; width: 5px; height: 5px; }
 
-  .registre-entete, .ligne { grid-template-columns: 16px minmax(0, max-content) minmax(6px, 1fr) 30px 34px 34px; column-gap: 5px; }
+  .registre-entete, .ligne { grid-template-columns: var(--grille-etroite); column-gap: 5px; }
   .registre-entete { font-size: 12px; }
   .registre-entete .long { display: none; }
   .registre-entete .court { display: inline; }
   .nom-fr { font-size: 16px; }
   .nom-en { font-size: 13px; }
-  .prix { font-size: 15px; }
-  .prix-cout { font-size: 13px; }
+  .valeur { font-size: 15px; }
+  .valeur.ton-pale, .valeur-texte { font-size: 13px; }
   .unique-contenu { padding: 16px 12px 8px 14px; }
   .page::before { inset: 6px; }
   .points-conduite { margin-top: 13px; }
@@ -940,13 +949,13 @@ mark { background: var(--surligne); color: var(--encre-rouge); border-radius: 2p
   background:
     radial-gradient(ellipse 70% 55% at 45% 38%, rgba(255, 205, 160, 0.14), transparent 70%),
     radial-gradient(ellipse at center, transparent 48%, rgba(12, 4, 0, 0.62) 100%),
-    linear-gradient(rgba(70, 24, 8, 0.3), rgba(36, 10, 3, 0.42)),
-    url('/textures/cuir.jpg') center / 560px;
+    linear-gradient(var(--voile-cuir-1), var(--voile-cuir-2)),
+    var(--texture-cuir) center / 560px;
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 220, 180, 0.15), inset 0 0 28px rgba(0, 0, 0, 0.45);
 }
 .tome-doublure {
   transform: rotateY(180deg);
-  background: linear-gradient(rgba(30, 8, 2, 0.55), rgba(30, 8, 2, 0.55)), url('/textures/cuir.jpg') center / 560px;
+  background: linear-gradient(rgba(30, 8, 2, 0.55), rgba(30, 8, 2, 0.55)), var(--texture-cuir) center / 560px;
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.6);
 }
 /* Paste-down endpaper inside the cover. */
@@ -982,7 +991,7 @@ mark { background: var(--surligne); color: var(--encre-rouge); border-radius: 2p
   border: 1.5px solid rgba(0, 0, 0, 0.42);
   box-shadow: 1px 1px 0 rgba(255, 215, 170, 0.12), inset 1px 1px 0 rgba(255, 215, 170, 0.1);
 }
-.tome-cadre::before { content: ''; position: absolute; inset: 7px; border: 1px solid rgba(214, 174, 90, 0.55); pointer-events: none; }
+.tome-cadre::before { content: ''; position: absolute; inset: 7px; border: 1px solid color-mix(in srgb, var(--dorure-2) 55%, transparent); pointer-events: none; }
 .tome-embleme { filter: drop-shadow(0 2px 1px rgba(0, 0, 0, 0.75)) drop-shadow(0 0 12px rgba(232, 170, 80, 0.25)); }
 .tome-titre {
   margin: 14px 0 0;
@@ -990,13 +999,13 @@ mark { background: var(--surligne); color: var(--encre-rouge); border-radius: 2p
   font-weight: 400;
   font-size: calc(var(--tome-l) * 0.14);
   line-height: 1.04;
-  background: linear-gradient(180deg, #fff0bf 0%, #e3b964 45%, #a87a2c 70%, #e9c878 100%);
+  background: var(--dorure);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.8)) drop-shadow(0 0 12px rgba(232, 170, 80, 0.2));
 }
-.tome-fleuron { width: 72%; color: #d6ae5a; filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.7)); }
+.tome-fleuron { width: 72%; color: color-mix(in srgb, var(--dorure-2) 85%, var(--dorure-3)); filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.7)); }
 
 /* Iron lock plate on the cover, scaled with the key so the keyhole fits it. */
 .fermoir { position: absolute; z-index: 3; right: var(--marge-serrure); top: calc(var(--y-trou) - var(--plaque) * 58 / 84); width: var(--plaque); height: calc(var(--plaque) * 140 / 84); }
@@ -1074,3 +1083,101 @@ mark { background: var(--surligne); color: var(--encre-rouge); border-radius: 2p
 .egare h1 { font-family: var(--f-gothique); font-weight: 400; font-size: 52px; color: var(--or-pale); margin: 0; }
 .egare p { font-style: italic; color: #e8d6ae; max-width: 420px; }
 .egare a { color: var(--or); font-family: var(--f-capitales); }
+
+/* ═══════════════════════════ Public book: the cover opens on a click ═══════════════════════════ */
+
+.tome-ouvrir {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  border: 0;
+  padding: 0;
+  border-radius: 4px 10px 10px 4px;
+  background: transparent;
+  cursor: pointer;
+  transition: box-shadow 260ms ease;
+}
+.tome-ouvrir:not(:disabled):hover, .tome-ouvrir:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--dorure-2) 35%, transparent), 0 0 28px rgba(236, 190, 110, 0.18);
+}
+.tome-ouvrir:disabled { cursor: default; }
+/* No key to turn: the cover swings at once (same swing, same hidden front face past upright). */
+.acces-public.etat-ouvert .tome-battant { animation-delay: 120ms; }
+.acces-public.etat-ouvert .tome-couverture { animation-delay: 120ms; }
+.acces-public .tome { cursor: pointer; }
+
+/* ═══════════════════════════ Private sections ═══════════════════════════ */
+
+/* Re-seal: a small engraved line at the foot of an unlocked private section's pages. */
+.resceller {
+  flex: none;
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: 14px auto 2px;
+  padding: 3px 10px;
+  border: 0;
+  border-top: 1px solid rgba(120, 60, 30, 0.22);
+  background: none;
+  font-family: var(--f-capitales);
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  color: var(--encre-pale);
+  /* Cut into the paper: dark groove, light lower lip. */
+  text-shadow: 0 1px 0 rgba(255, 248, 228, 0.7), 0 -1px 0 rgba(60, 30, 10, 0.25);
+  transition: color 200ms ease;
+}
+.resceller-icone { width: 15px; height: 15px; filter: drop-shadow(0 1px 0 rgba(255, 248, 228, 0.7)); }
+.resceller:not(:disabled):hover, .resceller:focus-visible { color: var(--encre-rouge); outline: none; }
+.unique-contenu .resceller { display: flex; }
+
+/* Sealed page: the cover's iron lock and key, laid on the paper. */
+.serrure-section {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 18px 0;
+}
+.serrure-section-scene {
+  --cle-l: 300px;
+  --ecart: 26px;
+  --plaque: calc(var(--cle-l) * 84 / 340);
+  /* The keyhole sits at the plate's centre; the key's sheath clips it there, so it seems to enter. */
+  --trou: calc(var(--plaque) / 2);
+  --course: calc(var(--ecart) + var(--cle-l) * 64 / 380);
+  display: flex;
+  align-items: flex-start;
+}
+.serrure-section-plaque {
+  position: relative;
+  z-index: 3;
+  flex: none;
+  width: var(--plaque);
+  height: calc(var(--plaque) * 140 / 84);
+}
+.serrure-section-plaque .serrure { filter: drop-shadow(2px 4px 4px rgba(40, 20, 5, 0.6)); }
+.serrure-section-fourreau {
+  position: relative;
+  z-index: 4;
+  overflow: hidden;
+  margin-top: calc(var(--plaque) * 58 / 84 - 12px - var(--cle-l) * 60 / 380);
+  margin-left: calc(-1 * var(--trou));
+  padding: 12px 0 12px calc(var(--trou) + var(--ecart));
+  perspective: 900px;
+}
+.serrure-section .cle { filter: drop-shadow(3px 6px 5px rgba(40, 20, 5, 0.55)); }
+.serrure-section .cle-tige { font-size: 15px; }
+.serrure-section.etat-ouvert .serrure-section-plaque { animation: fermoir-declic 240ms 480ms ease; }
+.serrure-section-message { min-height: 1.6em; margin: 14px 0 0; font-style: italic; font-size: 17px; color: var(--encre-rouge); text-align: center; }
+.serrure-section .citation-fin { margin-top: 18px; }
+
+@media (max-width: 860px) {
+  .serrure-section-scene { --cle-l: min(250px, 66vw); --ecart: 0px; --course: 0px; flex-direction: column; align-items: center; }
+  .serrure-section { min-height: 0; padding: 26px 0 8px; }
+  .serrure-section-fourreau { margin: 12px 0 0; padding: 8px 0; }
+  .serrure-section .cle-tige { font-size: 13px; padding: 0 6px; }
+}

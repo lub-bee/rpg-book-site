@@ -1,7 +1,13 @@
+import type { Metadata } from 'next'
 import Sceau from '@/components/Sceau'
+import { config } from '@/lib/config'
+import { livreComplet } from '@/lib/contenu'
 
-export const metadata = { title: 'Le sceau de la caravane' }
+export function generateMetadata(): Metadata {
+  return { title: config().couverture.onglet }
+}
 
 export default function PageSceau() {
-  return <Sceau />
+  const { config: c, embleme } = livreComplet()
+  return <Sceau config={c} embleme={embleme} />
 }

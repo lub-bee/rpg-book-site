@@ -1,9 +1,11 @@
 import Grimoire from '@/components/Grimoire'
-import { chargerLivre } from '@/lib/livre'
+import { livreComplet, livrePourLecteur } from '@/lib/contenu'
+import { sectionsOuvertes } from '@/lib/lecteur'
 
-// Re-read the catalogue every 5 minutes (only matters when it comes from a published sheet).
-export const revalidate = 300
+// Rendered per request: the sealed sections depend on the reader's cookies.
+export const dynamic = 'force-dynamic'
 
 export default async function Accueil() {
-  return <Grimoire livre={await chargerLivre()} />
+  const complet = livreComplet()
+  return <Grimoire livre={livrePourLecteur(complet, await sectionsOuvertes(complet.defs))} />
 }
