@@ -1,7 +1,7 @@
 {
   "titre": "Copiste Ri'Oblan",
   "sousTitre": "Livre d'échantillons",
-  "devise": "« Ce qui est copié de bonne griffe ne s'efface jamais. »",
+  "devise": "« Les mots partent dans le vent, les lettres s'encrent dans le temps. »",
   "langue": "fr",
   "locale": "fr-FR",
   "acces": "public",
@@ -65,7 +65,7 @@
 
   "pageDeTitre": {
     "surTitre": "Livre d'échantillons du",
-    "texte": "Ri'Oblan copie, relie et dore des grimoires sur commande. Ce livre montre ce que sa plume sait faire : registres, carnets, pages scellées et pages encore blanches.",
+    "texte": "Ri'Oblan copie, relie et dore des grimoires sur commande. Ce livre montre ce que sa griffe sait faire : registres, carnets, pages scellées et pages encore blanches.",
     "consigne": "Consigné le {date}"
   },
 

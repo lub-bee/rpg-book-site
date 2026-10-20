@@ -141,7 +141,7 @@ type: notes
 titre: Commander un grimoire
 court: Commander
 icone: quill-ink
-resume: Ce que le copiste demande avant de tremper sa plume.
+resume: Ce que le copiste demande avant d'apposer sa griffe.
 auteur: Ri'Oblan, copiste
 citation: Une page bien copiée vaut mieux que dix pages bien racontées.
 ---

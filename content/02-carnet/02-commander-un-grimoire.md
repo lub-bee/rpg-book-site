@@ -3,7 +3,7 @@ type: notes
 titre: Commander un grimoire
 court: Commander
 icone: quill-ink
-resume: Ce que Ri'Oblan demande avant de tremper sa plume, et ce que le client reçoit en échange de ses septims.
+resume: Ce que Ri'Oblan demande avant d'apposer sa griffe, et ce que le client reçoit en échange de ses septims.
 auteur: Ri'Oblan, copiste
 citation: Une page bien copiée vaut mieux que dix pages bien racontées.
 ---
