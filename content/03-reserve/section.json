@@ -1,0 +1,11 @@
+{
+  "titre": "La Réserve",
+  "court": "Réserve",
+  "couleur": "#5a2d6b",
+  "icone": "locked-chest",
+  "surtitre": "La Réserve",
+  "prive": true,
+  "serrure": {
+    "intro": "Cette section est fermée d'une serrure de fer. Ri'Oblan n'en confie le mot qu'à ceux qui ont payé pour le connaître."
+  }
+}

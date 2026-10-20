@@ -1,0 +1,125 @@
+{
+  "titre": "Copiste Ri'Oblan",
+  "sousTitre": "Livre d'échantillons",
+  "devise": "« Ce qui est copié de bonne griffe ne s'efface jamais. »",
+  "langue": "fr",
+  "locale": "fr-FR",
+  "acces": "public",
+
+  "onglet": {
+    "titre": "Copiste Ri'Oblan",
+    "description": "Le livre d'échantillons de Ri'Oblan, copiste et relieur de grimoires."
+  },
+
+  "embleme": { "fichier": "embleme.svg", "rotationEntete": 90 },
+
+  "apparence": {
+    "table": "/textures/table.jpg",
+    "cuir": "/textures/cuir.jpg",
+    "voileCuir": ["rgba(70, 24, 8, 0.3)", "rgba(36, 10, 3, 0.42)"],
+    "dorure": ["#fff0bf", "#e3b964", "#a87a2c", "#e9c878"],
+    "couleurs": {
+      "table": "#160e08",
+      "cuir": "#6e3520",
+      "cuirClair": "#9a5634",
+      "cuirSombre": "#3a170b",
+      "or": "#c9a24e",
+      "orPale": "#ecd393",
+      "parchemin": "#efdeb6",
+      "encre": "#2a180b",
+      "encreDouce": "#573c24",
+      "encrePale": "#876a47",
+      "encreRouge": "#8e1f14"
+    }
+  },
+
+  "couverture": {
+    "titre": "Ri'Oblan",
+    "salut": "Sois le bienvenu, voyageur.",
+    "invite": "Effleure la couverture pour ouvrir le livre.",
+    "ouvrir": "Ouvrir le livre",
+    "onglet": "Le livre de Ri'Oblan"
+  },
+
+  "serrure": {
+    "placeholder": "Le mot du copiste",
+    "aide": "Le mot du copiste (mot de passe)",
+    "tourner": "Tourner la clé",
+    "refus": "La serrure résiste. Ce n'est pas le bon mot, ami.",
+    "coincee": "La clé s'est coincée. Réessaie, ami.",
+    "nonForgee": "Cette serrure n'a jamais été forgée : le livre attend ses instructions."
+  },
+
+  "sectionPrivee": {
+    "intro": "Ces pages sont scellées. Seul le bon mot fait tourner la clé.",
+    "placeholder": "Le mot de la Réserve",
+    "aide": "Le mot de la section (mot de passe)",
+    "tourner": "Tourner la clé",
+    "refus": "Le fer ne bouge pas. Ce mot n'ouvre pas cette serrure.",
+    "coincee": "La clé s'est coincée. Réessaie, ami.",
+    "nonForgee": "Cette serrure n'a jamais été forgée : la section attend ses instructions.",
+    "citation": "Ce qui est sous clé n'est pas perdu, seulement gardé.",
+    "resceller": "Refermer la serrure",
+    "aideResceller": "Sceller de nouveau cette section"
+  },
+
+  "pageDeTitre": {
+    "surTitre": "Livre d'échantillons du",
+    "texte": "Ri'Oblan copie, relie et dore des grimoires sur commande. Ce livre montre ce que sa plume sait faire : registres, carnets, pages scellées et pages encore blanches.",
+    "consigne": "Consigné le {date}"
+  },
+
+  "calendrier": {
+    "fuseau": "Asia/Tokyo",
+    "mois": ["Primétoile", "Clairciel", "Semailles", "Ondepluie", "Plantaisons", "Mi-l'An", "Hautzénith", "Vifazur", "Âtrefeu", "Soufflegivre", "Sombreciel", "Soirétoile"]
+  },
+
+  "sommaire": {
+    "titre": "Sommaire",
+    "court": "Sommaire",
+    "couleur": "#8a6a1f",
+    "icone": "open-book",
+    "tableDesMatieres": "Table des matières",
+    "citation": "Un livre sans sommaire est une route sans bornes."
+  },
+
+  "textes": {
+    "recherche": {
+      "placeholder": "Chercher dans tout le livre (FR ou EN)…",
+      "aide": "Chercher dans tout le livre",
+      "effacer": "Effacer la recherche",
+      "trouvailles": "{n} trouvaille{s}",
+      "rien": "rien",
+      "mentions": "{n} mention{s}",
+      "lignes": "{n} article{s}",
+      "autres": "et {n} autres…",
+      "vide": "Le copiste ne connaît aucun article de ce nom… pas encore."
+    },
+    "rechercheLocale": {
+      "placeholder": "Chercher en ce feuillet…",
+      "aide": "Chercher dans le feuillet {titre}",
+      "vides": [
+        "Le copiste a beau tourner ses pages… rien de tel en ce feuillet.",
+        "Aucun article ne répond à ce nom, ami. Peut-être sous une autre lune ?",
+        "Le registre reste muet. Essaie un autre mot, ou une autre langue."
+      ]
+    },
+    "signature": "Consigné par {auteur}",
+    "refermer": { "gravure": "Refermer", "aide": "Refermer le livre" },
+    "coins": {
+      "precedente": "Page précédente",
+      "suivante": "Page suivante",
+      "aidePrecedente": "Tirer ou cliquer pour revenir en arrière",
+      "aideSuivante": "Tirer ou cliquer pour tourner la page"
+    },
+    "navigation": { "rubans": "Sections du livre", "onglets": "Pages de la section" }
+  },
+
+  "egare": {
+    "titre": "Page arrachée",
+    "texte": "Quelqu'un a déchiré cette page du livre. Le copiste soupçonne les rats d'égout de Faillaise.",
+    "retour": "Revenir au livre"
+  },
+
+  "credits": ["Enluminures d'après les graveurs de game-icons.net (CC BY 3.0)"]
+}
