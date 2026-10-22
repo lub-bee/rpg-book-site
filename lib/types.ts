@@ -86,8 +86,21 @@ export type PageRegistre = Base & {
 export type PageAVenir = Base & { type: 'a-venir'; resume: string; attente: string; citation: string }
 /** A page of a private section the reader has not unlocked: only its title, label and icon are sent. */
 export type PageScellee = Base & { type: 'scellee' }
+/**
+ * The book's last leaf, « Achevé de copier »: colophon and credits (livre.json "colophon", defaults in
+ * lib/credits.ts). Back matter: in the title page's section (no ribbon of its own), no chapter number,
+ * listed last in the contents; on it, its own tab only.
+ */
+export type PageColophon = Base & {
+  type: 'colophon'
+  intro: string
+  suite: string[]
+  signature: string
+  citation: string
+  rubriques: { titre: string; texte: string }[]
+}
 
-export type Page = PageSommaire | PageNotes | PageRegistre | PageAVenir | PageScellee
+export type Page = PageSommaire | PageNotes | PageRegistre | PageAVenir | PageScellee | PageColophon
 
 export type Embleme = { viewBox: string; d: string }
 

@@ -3,7 +3,7 @@
 import { useEffect, useRef, type CSSProperties } from 'react'
 import type { Livre, Page, PageRegistre } from '@/lib/types'
 import { accorder, romain } from '@/lib/format'
-import { CitationFin, Dicton, EnTete, Frontispice, type Ctx } from './Pages'
+import { CitationFin, Credits, Dicton, EnTete, Frontispice, type Ctx } from './Pages'
 import { Fleuron, GlypheSceau } from './Ornements'
 import { DosCouverture, FaceCouverture } from './Couverture'
 
@@ -128,12 +128,29 @@ function PageCopie({ page, livre }: { page: Page; livre: Livre }) {
           {section?.serrure && <CitationFin texte={section.serrure.citation} />}
         </section>
       )
+    case 'colophon':
+      // The last leaf travels with the copy: its credits (CC BY attribution) must follow the book.
+      return (
+        <section id={page.id} className="feuille copie-colophon" style={teinte(livre, page.section)}>
+          <EnTete surtitre={page.surtitre} titre={page.titre} sousTitre={page.sousTitre} icone={icone}>
+            {page.intro && <p className="intro lettrine">{page.intro}</p>}
+            {page.suite.map((t) => (
+              <p key={t} className="intro">
+                {t}
+              </p>
+            ))}
+            {page.signature && <p className="signature">{page.signature}</p>}
+          </EnTete>
+          <Credits page={page} />
+          <CitationFin texte={page.citation} />
+        </section>
+      )
   }
 }
 
 const teinte = (livre: Livre, section: string) => ({ '--teinte': livre.sections.find((s) => s.id === section)?.couleur } as CSSProperties)
 
-/** Contents of the copy: every page of every section, linked to its sheet, numbered within its section. */
+/** Contents of the copy: every page of every section, linked to its sheet, numbered within its section; the colophon last. */
 function SommaireCopie({ livre }: { livre: Livre }) {
   return (
     <nav className="table-matieres copie-sommaire">
@@ -157,6 +174,19 @@ function SommaireCopie({ livre }: { livre: Livre }) {
                 ))}
             </ol>
           </section>
+        ))}
+      {livre.pages
+        .filter((p) => p.type === 'colophon')
+        .map((p) => (
+          <ol key={p.id} className="table-fin">
+            <li>
+              <a href={`#${p.id}`}>
+                <span className="renvoi" />
+                <span className="entree">{p.titre}</span>
+                <span className="points" />
+              </a>
+            </li>
+          </ol>
         ))}
     </nav>
   )

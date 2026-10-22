@@ -438,6 +438,28 @@ function lire(): LivreComplet {
     })
   }
 
+  // The last leaf, « Achevé de copier » (livre.json "colophon"): back matter in the title page's section,
+  // so it has no ribbon of its own and no chapter number.
+  const col = cfg.colophon
+  if (col) {
+    if (ids.has('colophon')) general.erreur('colophon', `takes the page name "colophon", already used by ${ids.get('colophon')} (rename that file, or set "colophon": false)`)
+    pages.push({
+      type: 'colophon',
+      id: 'colophon',
+      section: 'sommaire',
+      titre: col.titre,
+      sousTitre: col.sousTitre,
+      court: col.court,
+      icone: col.icone,
+      surtitre: col.surtitre,
+      intro: col.intro,
+      suite: col.suite,
+      signature: col.signature,
+      citation: col.citation,
+      rubriques: col.rubriques,
+    })
+  }
+
   if (erreurs.length) new Controle('', erreurs).verifier()
   return {
     config: cfg,

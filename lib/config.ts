@@ -3,6 +3,7 @@
 
 import brut from '@/content/livre.json'
 import { Controle, type Obj } from './controle'
+import { colophonParDefaut, type Rubrique } from './credits'
 
 export type TextesSerrure = {
   /** Text inside the key-shaped field. */
@@ -79,6 +80,22 @@ export type Config = {
   }
   egare: { titre: string; texte: string; retour: string }
   credits: string[]
+  /**
+   * The book's last leaf, « Achevé de copier » (null = off). Every text falls back on lib/credits.ts;
+   * `rubriques` holds the engine's credits (unless "creditsMoteur": false) followed by the book's own.
+   */
+  colophon: {
+    titre: string
+    sousTitre: string
+    court: string
+    icone: string
+    surtitre: string
+    intro: string
+    suite: string[]
+    signature: string
+    citation: string
+    rubriques: Rubrique[]
+  } | null
 }
 
 /** Palette keys of `apparence.couleurs` and the CSS variables they set. */
@@ -165,6 +182,34 @@ function lire(v: unknown): Config {
   const copie = active(modules.copie, 'modules.copie')
   if (mois.length && mois.length !== 12) c.erreur('calendrier.mois', 'must list the 12 month names (or be left out)')
 
+  // The colophon is on unless "colophon": false; an object overrides the defaults of lib/credits.ts.
+  const col = r.colophon === undefined ? {} : active(r.colophon, 'colophon')
+  const langue = c.texte(r, 'langue', '', 'fr')
+  const d = colophonParDefaut(langue)
+  const rubriques = (o: Obj): Rubrique[] => {
+    if (o.rubriques === undefined) return []
+    if (!Array.isArray(o.rubriques)) {
+      c.erreur('colophon.rubriques', 'must be a list of { "titre", "texte" }')
+      return []
+    }
+    return o.rubriques.map((x, k) => {
+      const v = c.objet(x, `colophon.rubriques[${k}]`)
+      return { titre: c.texte(v, 'titre', `colophon.rubriques[${k}]`), texte: c.texte(v, 'texte', `colophon.rubriques[${k}]`) }
+    })
+  }
+  const colophon = col && {
+    titre: c.texte(col, 'titre', 'colophon', d.titre),
+    sousTitre: c.texte(col, 'sousTitre', 'colophon', d.sousTitre),
+    court: c.texte(col, 'court', 'colophon', d.court),
+    icone: c.texte(col, 'icone', 'colophon', 'quill'),
+    surtitre: c.texte(col, 'surtitre', 'colophon', d.surtitre),
+    intro: c.texte(col, 'intro', 'colophon', d.intro).replace(/\{titre\}/g, String(r.titre ?? '')),
+    suite: c.textes(col, 'suite', 'colophon', []),
+    signature: c.texte(col, 'signature', 'colophon', d.signature),
+    citation: c.texte(col, 'citation', 'colophon', d.citation),
+    rubriques: [...(c.booleen(col, 'creditsMoteur', 'colophon', true) ? d.moteur : []), ...rubriques(col)],
+  }
+
   const credits = c.textes(r, 'credits', '')
   if (!credits.some((x) => /game-icons/i.test(x))) {
     c.erreur('credits', 'must credit game-icons.net (the icons are CC BY 3.0: attribution is required)')
@@ -175,7 +220,7 @@ function lire(v: unknown): Config {
     titre: c.texte(r, 'titre', ''),
     sousTitre: c.texte(r, 'sousTitre', ''),
     devise: c.texte(r, 'devise', ''),
-    langue: c.texte(r, 'langue', '', 'fr'),
+    langue,
     locale: c.texte(r, 'locale', '', 'fr-FR'),
     acces: c.choix(r, 'acces', '', ['public', 'prive'] as const),
     onglet: { titre: c.texte(onglet, 'titre', 'onglet'), description: c.texte(onglet, 'description', 'onglet', '') },
@@ -259,6 +304,7 @@ function lire(v: unknown): Config {
     },
     egare: { titre: c.texte(egare, 'titre', 'egare'), texte: c.texte(egare, 'texte', 'egare'), retour: c.texte(egare, 'retour', 'egare') },
     credits,
+    colophon,
   }
   if (!config.textes.rechercheLocale.vides.length) c.erreur('textes.rechercheLocale.vides', 'must hold at least one line')
   c.verifier()

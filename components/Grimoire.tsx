@@ -412,7 +412,11 @@ export default function Grimoire({ livre }: { livre: Livre }) {
   const sectionActive = pages[destination].section
   // On the title page, the tabs of the first section are shown.
   const sectionOnglets = sectionActive === 'sommaire' ? sections[1]?.id : sectionActive
-  const onglets = pages.map((p, i) => ({ p, i })).filter(({ p }) => p.section === sectionOnglets)
+  // On the colophon (back matter), its own tab only.
+  const onglets =
+    pages[destination].type === 'colophon'
+      ? [{ p: pages[destination], i: destination }]
+      : pages.map((p, i) => ({ p, i })).filter(({ p }) => p.section === sectionOnglets && p.type !== 'colophon')
   const avant = tourne ? tourne.vers > tourne.de : true
 
   const voletsDoubles = () => {

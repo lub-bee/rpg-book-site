@@ -92,7 +92,8 @@ All visible text is French in the example, but any language works. Templates: `{
 | `textes.fiche.ranger` / `.aide` | Pinned slip of a ledger row's `detail`: the "put it away" action and the rows' tooltip. Required only when a ledger has a `detail` column. |
 | `egare.titre` / `.texte` / `.retour` | The "torn page" (404). |
 | `modules.copie` | Printable copy of the book ([Printable copy](#printable-copy)). Absent or `false` = off. |
-| `credits` | Lines of the colophon on the title page. **Must credit game-icons.net** (CC BY 3.0): the book refuses to load otherwise. |
+| `credits` | Short credit lines at the foot of the title page. **Must credit game-icons.net** (CC BY 3.0): the book refuses to load otherwise. |
+| `colophon` | The book's last leaf, « Achevé de copier » ([Colophon](#colophon)). Absent or `true` = on, with the defaults; `false` = off; an object overrides them. |
 
 ## `section.json`
 
@@ -231,6 +232,40 @@ citation: Le copiste pressé fait deux livres - le mauvais, puis le bon.
 ---
 ```
 
+## Colophon
+
+The book ends on a last leaf, « Achevé de copier » (*Colophon & credits*): who made the book on the left
+page, the credits on the right. It is back matter: no ribbon of its own (it belongs to the title page's
+section), no chapter number, listed last in the table of contents, and on it only its own tab is shown.
+The printable copy ends with it too, so the credits follow the PDF. It is **on by default**, with wording
+in the book's language (French for `fr…`, English otherwise, from `lib/credits.ts`); `"colophon": false`
+removes it. The page name `colophon` is then reserved (deep link `/#colophon`).
+
+```json
+"colophon": {
+  "intro": "Ce livre d'échantillons fut relié, réglé et copié par Ri'Oblan…",
+  "suite": ["L'emblème du copiste est de sa main."],
+  "signature": "Ri'Oblan, copiste",
+  "rubriques": [
+    { "titre": "Licences", "texte": "Le code est sous licence MIT, les textes sous CC BY-NC 4.0." },
+    { "titre": "Avertissement", "texte": "…" }
+  ]
+}
+```
+
+| Key | Meaning (default) |
+|---|---|
+| `titre` / `sousTitre` | Page title and the line in italics under it (`Achevé de copier` / `Colophon & crédits`). |
+| `court` | Its thumb tab label (`Achevé`). |
+| `icone` | Icon beside the title and on the tab (`quill`). |
+| `surtitre` | Small caps line above the title (`Dernier feuillet`). |
+| `intro` | First paragraph of the left page, with an illuminated initial. `{titre}` = the book's title. |
+| `suite` | More paragraphs under it (list, default none). |
+| `signature` | Signature line under them (default none). |
+| `citation` | Closing quote of the left page. |
+| `creditsMoteur` | `true` (default): the right page starts with the credits of what the template ships: game-icons.net (CC BY 3.0), the Poly Haven textures (CC0), the fonts (SIL OFL). Set `false` if you replaced the textures or fonts, and write your own. |
+| `rubriques` | The book's own credits, after the engine's: a list of `{ "titre", "texte" }` (licenses, illustrators, a fan-work disclaimer…). |
+
 ## Access
 
 - **Public book** (`"acces": "public"`): every visit starts at the closed cover; a click opens it
@@ -259,7 +294,7 @@ citation: Le copiste pressé fait deux livres - le mauvais, puis le bon.
 ### Icons
 
 Section, page, tab and stamp icons come from [game-icons.net](https://game-icons.net) (CC BY 3.0,
-credited on the title page — keep the credit) through `@iconify-json/game-icons`. Use the icon's
+credited on the title page and on the colophon — keep the credit) through `@iconify-json/game-icons`. Use the icon's
 name: the last part of its URL on game-icons.net (e.g. `beer-stein`, `crossed-swords`). Unknown names
 are reported in the server log. Only the icons in use are sent to the browser.
 
@@ -337,15 +372,26 @@ The copy is made from the reader's view of the book: a private section the reade
 copied sealed (title and lock wording only), its pages never sent. Without `modules.copie`, `/copie`
 answers 404.
 
-## Credits
+## Credits & licenses
 
-- Icons: game-icons.net, CC BY 3.0 (attribution required, shown on the title page).
-- Textures: Poly Haven, CC0.
-- Fonts: Google Fonts (SIL Open Font License).
+The colophon ([Colophon](#colophon)) carries the same facts in character, at the end of the book and of
+its table of contents.
+
+- Showcase book « Copiste Ri'Oblan »: bound, ruled and copied by **Ri'Oblan**, emblem included.
+- Icons: [game-icons.net](https://game-icons.net) (Lorc, Delapouite and contributors), CC BY 3.0
+  (attribution required: a short line on the title page, and the colophon).
+- Textures: Poly Haven's wood_table, brown_leather and rusty_metal_04 (CC0) for `table.jpg`, `cuir.jpg` /
+  `cuir-impression.jpg` and `fer.jpg`; `parchemin-impression.jpg` (print parchment) is made for the project.
+- Fonts: UnifrakturMaguntia, IM Fell English / IM Fell English SC (SIL Open Font License, Google Fonts).
+- Licenses: code under MIT (`LICENSE`); the showcase content (texts, ledgers, emblem) under CC BY-NC 4.0,
+  Ri'Oblan (`LICENSE-CONTENT.md`, which lists exactly what it covers and the third-party exceptions).
+  Your own book's content is yours: replace the showcase content and license it as you wish.
+- The showcase borrows from The Elder Scrolls (the Khajiit, septims), property of Bethesda Softworks /
+  ZeniMax Media. Fan work, not affiliated, not for sale. The engine references no third-party universe.
 
 ## Where things are (for developers)
 
-`lib/config.ts` (livre.json schema), `lib/contenu.ts` (content loader, validation, server-side filtering
+`lib/config.ts` (livre.json schema), `lib/credits.ts` (colophon defaults), `lib/contenu.ts` (content loader, validation, server-side filtering
 of sealed sections), `lib/sceau.ts` (signed cookies; also `signer` / `verifier`, a JSON value signed
 with `LIVRE_SECRET`, for future signed cookies), `middleware.ts` (cover / lock), `app/api/sceau` (book
 lock), `app/api/section` (section locks), `app/copie` + `components/Copie.tsx` (printable copy),

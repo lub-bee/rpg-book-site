@@ -136,5 +136,21 @@
     "retour": "Revenir au livre"
   },
 
-  "credits": ["Enluminures d'après les graveurs de game-icons.net (CC BY 3.0)"]
+  "credits": ["Enluminures d'après les graveurs de game-icons.net (CC BY 3.0)"],
+
+  "colophon": {
+    "intro": "Ce livre d'échantillons fut relié, réglé et copié par Ri'Oblan, copiste et relieur de grimoires, afin que chaque client voie ce que sa griffe sait faire avant d'ouvrir sa bourse.",
+    "suite": ["L'emblème du copiste, ses registres et ses carnets sont de sa main."],
+    "signature": "Ri'Oblan, copiste",
+    "rubriques": [
+      {
+        "titre": "Licences",
+        "texte": "Le code du livre est sous licence MIT. Les textes, les registres et l'emblème sont de Ri'Oblan, sous licence CC BY-NC 4.0."
+      },
+      {
+        "titre": "Avertissement",
+        "texte": "The Elder Scrolls, les Khajiits, les septims et Faillaise appartiennent à Bethesda Softworks et ZeniMax Media. Ce livre est une œuvre de fans, sans lien avec elles, et il ne se vend pas, pas même contre des septims."
+      }
+    ]
+  }
 }

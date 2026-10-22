@@ -2,7 +2,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
-import type { Livre, Page, PageRegistre, PageScellee } from '@/lib/types'
+import type { Livre, Page, PageColophon, PageRegistre, PageScellee } from '@/lib/types'
 import { ligneCorrespond, plages } from '@/lib/recherche'
 import { accorder, dateDuLivre, romain } from '@/lib/format'
 import { Embleme, Fleuron, GlypheSceau, Icone, Plume } from './Ornements'
@@ -118,6 +118,19 @@ export function PageGauche({ page, ctx, compact = false }: { page: Page; ctx: Ct
         return (
           <EnTete surtitre={page.surtitre} titre={page.titre} sousTitre={page.sousTitre} icone={icone} compact={compact}>
             {sectionDe(ctx, page)?.serrure?.intro && <p className="intro lettrine">{sectionDe(ctx, page)!.serrure!.intro}</p>}
+          </EnTete>
+        )
+      case 'colophon':
+        return (
+          <EnTete surtitre={page.surtitre} titre={page.titre} sousTitre={page.sousTitre} icone={icone} compact={compact}>
+            {page.intro && <p className="intro lettrine">{page.intro}</p>}
+            {page.suite.map((t) => (
+              <p key={t} className="intro">
+                {t}
+              </p>
+            ))}
+            {page.signature && <p className="signature">{page.signature}</p>}
+            {!compact && <CitationFin texte={page.citation} />}
           </EnTete>
         )
     }
@@ -299,6 +312,8 @@ export function PageDroite({ page, ctx, integre = false }: { page: Page; ctx: Ct
         )
       case 'scellee':
         return <SerrureSection page={page} ctx={ctx} />
+      case 'colophon':
+        return <Credits page={page} />
     }
   })()
   if (integre) return corps
@@ -320,6 +335,21 @@ export function PageUnique({ page, ctx }: { page: Page; ctx: Ctx }) {
         <Resceller page={page} ctx={ctx} />
         <Folio n={rang(ctx) + 1} />
       </Defile>
+    </div>
+  )
+}
+
+/** Right page of the last leaf: one short paragraph per credit heading. */
+export function Credits({ page }: { page: PageColophon }) {
+  return (
+    <div className="credits">
+      {page.rubriques.map((r) => (
+        <section key={r.titre}>
+          <h4>{r.titre}</h4>
+          <p>{r.texte}</p>
+        </section>
+      ))}
+      <Fleuron />
     </div>
   )
 }
@@ -352,6 +382,20 @@ function TableDesMatieres({ ctx }: { ctx: Ctx }) {
             </ol>
           </section>
         ))}
+      {/* Back matter (the colophon), after every section. */}
+      {pages.map((p, i) =>
+        p.type !== 'colophon' ? null : (
+          <ol key={p.id} className="table-fin">
+            <li>
+              <button type="button" tabIndex={ctx.interactif ? 0 : -1} onClick={() => ctx.aller?.(i)}>
+                <span className="entree">{p.titre}</span>
+                <span className="points" />
+                <span className="renvoi">{i >= avant ? romain((i - avant) * 2 + 1) : ''}</span>
+              </button>
+            </li>
+          </ol>
+        ),
+      )}
     </nav>
   )
 }
