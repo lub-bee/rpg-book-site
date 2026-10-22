@@ -40,7 +40,7 @@ export type Config = {
   sectionPrivee: TextesSerrure & { intro: string; citation: string; resceller: string; aideResceller: string }
   pageDeTitre: { surTitre: string; texte: string; consigne: string }
   calendrier: { fuseau: string; mois: string[] }
-  sommaire: { titre: string; court: string; couleur: string; icone: string; tableDesMatieres: string; citation: string }
+  sommaire: { titre: string; court: string; couleur: string; icone: string; tableDesMatieres: string; sousTitre: string; citation: string }
   textes: {
     recherche: {
       placeholder: string
@@ -130,7 +130,6 @@ function lire(v: unknown): Config {
   const voileCuir = c.textes(apparence, 'voileCuir', 'apparence', ['rgba(70, 24, 8, 0.3)', 'rgba(36, 10, 3, 0.42)'])
   if (voileCuir.length !== 2) c.erreur('apparence.voileCuir', 'must list exactly 2 colours (top and bottom of the tint laid over the leather)')
   const mois = c.textes(calendrier, 'mois', 'calendrier', [])
-  if (mois.length && mois.length !== 12) c.erreur('calendrier.mois', 'must list the 12 month names (or be left out)')
 
   const credits = c.textes(r, 'credits', '')
   if (!credits.some((x) => /game-icons/i.test(x))) {
@@ -181,6 +180,7 @@ function lire(v: unknown): Config {
       couleur: c.texte(sommaire, 'couleur', 'sommaire'),
       icone: c.texte(sommaire, 'icone', 'sommaire'),
       tableDesMatieres: c.texte(sommaire, 'tableDesMatieres', 'sommaire'),
+      sousTitre: c.texte(sommaire, 'sousTitre', 'sommaire', ''),
       citation: c.texte(sommaire, 'citation', 'sommaire', ''),
     },
     textes: {

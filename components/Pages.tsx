@@ -54,7 +54,7 @@ function Defile({ ctx, className, children }: { ctx: Ctx; className?: string; ch
   )
 }
 
-function CitationFin({ texte }: { texte: string }) {
+export function CitationFin({ texte }: { texte: string }) {
   if (!texte) return null
   return (
     <blockquote className="citation-fin">
@@ -63,7 +63,23 @@ function CitationFin({ texte }: { texte: string }) {
   )
 }
 
+/** A saying under a page's summary, with who said it. */
+export function Dicton({ texte, auteur }: { texte: string; auteur: string }) {
+  if (!texte) return null
+  return (
+    <blockquote className="citation-fin dicton">
+      <p>{texte}</p>
+      {auteur && <p className="dicton-auteur">— {auteur}</p>}
+    </blockquote>
+  )
+}
+
+/** Pages placed before the title page carry no folio: the numbering starts at the title page. */
+export const avantSommaire = (pages: Page[]) => Math.max(0, pages.findIndex((p) => p.type === 'sommaire'))
+const rang = (ctx: Ctx) => ctx.index - avantSommaire(ctx.livre.pages)
+
 function Folio({ n }: { n: number }) {
+  if (n < 1) return null
   return <div className="folio">{romain(n)}</div>
 }
 
@@ -82,20 +98,21 @@ export function PageGauche({ page, ctx, compact = false }: { page: Page; ctx: Ct
         return <TeteRegistre page={page} ctx={ctx} compact={compact} />
       case 'notes':
         return (
-          <EnTete surtitre={page.surtitre} titre={page.titre} icone={icone} compact={compact}>
+          <EnTete surtitre={page.surtitre} titre={page.titre} sousTitre={page.sousTitre} icone={icone} compact={compact}>
             {page.resume && <p className="intro lettrine">{page.resume}</p>}
             {page.auteur && <p className="signature">{accorder(ctx.livre.config.textes.signature, { auteur: page.auteur })}</p>}
+            {!compact && <Dicton texte={page.dicton} auteur={page.dictonAuteur} />}
           </EnTete>
         )
       case 'a-venir':
         return (
-          <EnTete surtitre={page.surtitre} titre={page.titre} icone={icone} compact={compact}>
+          <EnTete surtitre={page.surtitre} titre={page.titre} sousTitre={page.sousTitre} icone={icone} compact={compact}>
             {page.resume && <p className="intro lettrine">{page.resume}</p>}
           </EnTete>
         )
       case 'scellee':
         return (
-          <EnTete surtitre={page.surtitre} titre={page.titre} icone={icone} compact={compact}>
+          <EnTete surtitre={page.surtitre} titre={page.titre} sousTitre={page.sousTitre} icone={icone} compact={compact}>
             {sectionDe(ctx, page)?.serrure?.intro && <p className="intro lettrine">{sectionDe(ctx, page)!.serrure!.intro}</p>}
           </EnTete>
         )
@@ -104,14 +121,17 @@ export function PageGauche({ page, ctx, compact = false }: { page: Page; ctx: Ct
   if (compact) return corps
   return (
     <div className="contenu gauche-contenu" style={teinte(ctx, page)}>
-      {corps}
-      <Resceller page={page} ctx={ctx} />
-      <Folio n={ctx.index * 2 + 1} />
+      {/* Scrolls inside the page's margins, as the right page does: the folio and the frame stay clear. */}
+      <div className="defile defile-gauche">
+        {corps}
+        <Resceller page={page} ctx={ctx} />
+      </div>
+      <Folio n={rang(ctx) * 2 + 1} />
     </div>
   )
 }
 
-function EnTete({
+export function EnTete({
   surtitre,
   titre,
   sousTitre,
@@ -144,7 +164,7 @@ function EnTete({
   )
 }
 
-function Frontispice({ ctx, compact }: { ctx: Ctx; compact: boolean }) {
+export function Frontispice({ ctx, compact }: { ctx: Ctx; compact: boolean }) {
   const { config, embleme, consigneLe } = ctx.livre
   const t = config.pageDeTitre
   return (
@@ -281,7 +301,7 @@ export function PageDroite({ page, ctx, integre = false }: { page: Page; ctx: Ct
   return (
     <div className="contenu droite-contenu" style={teinte(ctx, page)}>
       <Defile ctx={ctx}>{corps}</Defile>
-      <Folio n={ctx.index * 2 + 2} />
+      <Folio n={rang(ctx) * 2 + 2} />
     </div>
   )
 }
@@ -294,7 +314,7 @@ export function PageUnique({ page, ctx }: { page: Page; ctx: Ctx }) {
         <PageGauche page={page} ctx={ctx} compact />
         <PageDroite page={page} ctx={ctx} integre />
         <Resceller page={page} ctx={ctx} />
-        <Folio n={ctx.index + 1} />
+        <Folio n={rang(ctx) + 1} />
       </Defile>
     </div>
   )
@@ -302,14 +322,17 @@ export function PageUnique({ page, ctx }: { page: Page; ctx: Ctx }) {
 
 function TableDesMatieres({ ctx }: { ctx: Ctx }) {
   const { sections, pages, config } = ctx.livre
+  const avant = avantSommaire(pages)
   return (
     <nav className="table-matieres" aria-label={config.sommaire.tableDesMatieres}>
       <h3 className="titre-table">{config.sommaire.tableDesMatieres}</h3>
+      {config.sommaire.sousTitre && <div className="sous-titre sous-titre-table">{config.sommaire.sousTitre}</div>}
       {sections
         .filter((s) => s.id !== 'sommaire')
         .map((section) => (
           <section key={section.id}>
             <h4 style={{ color: section.couleur }}>{section.titre}</h4>
+            {section.sousTitre && <div className="sous-titre-section">{section.sousTitre}</div>}
             <ol>
               {pages.map((p, i) =>
                 p.section !== section.id ? null : (
@@ -317,7 +340,7 @@ function TableDesMatieres({ ctx }: { ctx: Ctx }) {
                     <button type="button" tabIndex={ctx.interactif ? 0 : -1} onClick={() => ctx.aller?.(i)}>
                       <span className="entree">{p.titre}</span>
                       <span className="points" />
-                      <span className="renvoi">{romain(i * 2 + 1)}</span>
+                      <span className="renvoi">{i >= avant ? romain((i - avant) * 2 + 1) : ''}</span>
                     </button>
                   </li>
                 ),

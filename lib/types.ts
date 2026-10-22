@@ -8,6 +8,8 @@ export type TextesSectionPrivee = Config['sectionPrivee']
 export type Section = {
   id: string
   titre: string
+  /** Line under the section's title in the table of contents (e.g. its name in another language). */
+  sousTitre: string
   court: string
   couleur: string
   icone: string
@@ -19,8 +21,11 @@ export type Section = {
   serrure: TextesSectionPrivee | null
 }
 
-/** `icone` is a game-icons.net name, resolved to its SVG body in `Livre.icones`. */
-type Base = { id: string; section: string; titre: string; court: string; icone: string; surtitre: string }
+/**
+ * `icone` is a game-icons.net name, resolved to its SVG body in `Livre.icones`. `sousTitre`: the line in
+ * italics under the page title (e.g. its name in another language), empty for none.
+ */
+type Base = { id: string; section: string; titre: string; sousTitre: string; court: string; icone: string; surtitre: string }
 
 /** Value of the stamp column of a ledger (e.g. the craftsman's guild). */
 export type Sceau = { cle: string; libelle: string; icone: string; couleur: string; legende: boolean }
@@ -51,10 +56,19 @@ export type Ligne = {
 }
 
 export type PageSommaire = Base & { type: 'sommaire'; citation: string }
-export type PageNotes = Base & { type: 'notes'; resume: string; auteur: string; html: string; citation: string; texte: string }
+export type PageNotes = Base & {
+  type: 'notes'
+  resume: string
+  auteur: string
+  /** Saying under the summary on the left page, and who said it. */
+  dicton: string
+  dictonAuteur: string
+  html: string
+  citation: string
+  texte: string
+}
 export type PageRegistre = Base & {
   type: 'registre'
-  sousTitre: string
   resume: string
   titreLibelle: string
   courtLibelle: string

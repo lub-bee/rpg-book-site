@@ -41,3 +41,42 @@ export function egaux(a: string, b: string): boolean {
   for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i)
   return diff === 0
 }
+
+/* ── Signed values ─────────────────────────────────────────────
+   For cookies that carry a value rather than a password seal (an identity, an OAuth state…):
+   `base64url(JSON).hmac`, readable by anyone, forgeable by no one without LIVRE_SECRET. The `usage`
+   is part of the signature, so a value signed for one use is refused for another. */
+
+const decodeur = new TextDecoder()
+
+function versBase64Url(octets: Uint8Array): string {
+  let bin = ''
+  octets.forEach((o) => (bin += String.fromCharCode(o)))
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+}
+
+function depuisBase64Url(s: string): Uint8Array {
+  const bin = atob(s.replace(/-/g, '+').replace(/_/g, '/'))
+  return Uint8Array.from(bin, (c) => c.charCodeAt(0))
+}
+
+/** Signs a JSON value for one usage. Throws when LIVRE_SECRET is not set (nothing can be signed then). */
+export async function signer(usage: string, valeur: unknown): Promise<string> {
+  const secret = process.env.LIVRE_SECRET
+  if (!secret) throw new Error('LIVRE_SECRET is not set: cannot sign a value')
+  const corps = versBase64Url(encodeur.encode(JSON.stringify(valeur)))
+  return `${corps}.${await hmac(secret, `${usage}:${corps}`)}`
+}
+
+/** The value signed by `signer` for this usage, or null (missing, forged, other usage, no secret). */
+export async function verifier<T>(usage: string, signe: string | undefined): Promise<T | null> {
+  const secret = process.env.LIVRE_SECRET
+  if (!secret || !signe) return null
+  const [corps, sig] = signe.split('.')
+  if (!corps || !sig || !egaux(sig, await hmac(secret, `${usage}:${corps}`))) return null
+  try {
+    return JSON.parse(decodeur.decode(depuisBase64Url(corps))) as T
+  } catch {
+    return null
+  }
+}

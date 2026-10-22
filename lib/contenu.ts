@@ -39,10 +39,14 @@ function slug(s: string): string {
 const sansPrefixe = (nom: string) => nom.replace(/\.[a-z]+$/i, '').replace(/^\d+[-_ .]*/, '')
 const ordre = (a: string, b: string) => a.localeCompare(b, 'en', { numeric: true })
 
+/**
+ * The number in a CSV cell. Tolerates units and symbols typed around it ("25 pièces", "12,5 ¤"), spaces
+ * between thousands ("1 200") and a decimal comma. The first number of the cell is taken.
+ */
 function nombre(s: string | undefined): number | null {
-  const t = (s ?? '').replace(/\s/g, '').replace(',', '.')
+  const t = (s ?? '').replace(/(\d)[\s\u00a0\u202f]+(?=\d)/g, '$1').match(/-?\d+(?:[.,]\d+)?/)?.[0]
   if (!t) return null
-  const n = Number(t)
+  const n = Number(t.replace(',', '.'))
   return Number.isFinite(n) ? n : null
 }
 
@@ -79,7 +83,7 @@ function lireEmbleme(fichier: string, c: Controle): Embleme {
 type Csv = { entete: string[]; lignes: string[][] }
 
 function lireRegistre(
-  base: { id: string; section: string; titre: string; court: string; icone: string; surtitre: string },
+  base: { id: string; section: string; titre: string; sousTitre: string; court: string; icone: string; surtitre: string },
   meta: Obj,
   dossier: string,
   c: Controle,
@@ -285,7 +289,6 @@ function lireRegistre(
   return {
     ...base,
     type: 'registre',
-    sousTitre: c.texte(meta, 'sousTitre', '', ''),
     resume: c.texte(meta, 'resume', '', ''),
     titreLibelle,
     courtLibelle,
@@ -318,6 +321,7 @@ function lire(): LivreComplet {
   const sommaire: DefSection = {
     id: 'sommaire',
     titre: cfg.sommaire.titre,
+    sousTitre: '',
     court: cfg.sommaire.court,
     couleur: cfg.sommaire.couleur,
     icone: cfg.sommaire.icone,
@@ -328,7 +332,7 @@ function lire(): LivreComplet {
   }
   const defs: DefSection[] = [sommaire]
   const pages: Page[] = [
-    { type: 'sommaire', id: 'sommaire', section: 'sommaire', titre: cfg.sommaire.titre, court: cfg.sommaire.court, icone: cfg.sommaire.icone, surtitre: '', citation: cfg.sommaire.citation },
+    { type: 'sommaire', id: 'sommaire', section: 'sommaire', titre: cfg.sommaire.titre, sousTitre: cfg.sommaire.sousTitre, court: cfg.sommaire.court, icone: cfg.sommaire.icone, surtitre: '', citation: cfg.sommaire.citation },
   ]
   const csvs = new Map<string, Csv>()
   const ids = new Map<string, string>()
@@ -352,6 +356,7 @@ function lire(): LivreComplet {
     const def: DefSection = {
       id,
       titre: c.texte(s, 'titre', ''),
+      sousTitre: c.texte(s, 'sousTitre', '', ''),
       court: c.texte(s, 'court', '', String(s.titre ?? '')),
       couleur: c.texte(s, 'couleur', ''),
       icone: c.texte(s, 'icone', ''),
@@ -371,6 +376,8 @@ function lire(): LivreComplet {
       .sort(ordre)
     if (!fichiers.length) c.erreur('', `the section has no page: add a file ${rel}/01-<name>.md`)
 
+    // {chapitre}: rank among the section's pages that count as chapters ("chapitre: false" leaves a page out).
+    let chapitres = 0
     fichiers.forEach((f, k) => {
       const cp = new Controle(`${rel}/${f}`, erreurs)
       const { meta: lu, corps } = frontmatter(fs.readFileSync(path.join(CONTENU, dossier, f), 'utf8'), cp)
@@ -380,13 +387,17 @@ function lire(): LivreComplet {
       if (ids.has(pid)) cp.erreur('', `has the same page name "${pid}" as ${ids.get(pid)} (page names must be unique in the book: rename one file)`)
       ids.set(pid, `${rel}/${f}`)
       const titre = cp.texte(meta, 'titre', '')
+      const chapitre = cp.booleen(meta, 'chapitre', '', true) ? romain(++chapitres).toUpperCase() : ''
+      // A page left out of the chapters keeps the section's title alone when the template numbers chapters.
+      const modele = !chapitre && modeleSurtitre.includes('{chapitre}') ? '{section}' : modeleSurtitre
       const base = {
         id: pid,
         section: id,
         titre,
+        sousTitre: cp.texte(meta, 'sousTitre', '', ''),
         court: cp.texte(meta, 'court', '', titre),
         icone: cp.texte(meta, 'icone', '', type === 'registre' ? 'scroll-unfurled' : type === 'notes' ? 'quill-ink' : 'sands-of-time'),
-        surtitre: cp.texte(meta, 'surtitre', '', accorder(modeleSurtitre, { section: def.titre, n: romain(k + 1).toUpperCase() })),
+        surtitre: cp.texte(meta, 'surtitre', '', accorder(modele, { section: def.titre, n: romain(k + 1).toUpperCase(), chapitre })),
       }
       if (type === 'notes') {
         pages.push({
@@ -394,9 +405,11 @@ function lire(): LivreComplet {
           type: 'notes',
           resume: cp.texte(meta, 'resume', '', ''),
           auteur: cp.texte(meta, 'auteur', '', ''),
+          dicton: cp.texte(meta, 'dicton', '', ''),
+          dictonAuteur: cp.texte(meta, 'dictonAuteur', '', ''),
           citation: cp.texte(meta, 'citation', '', ''),
           html: marked.parse(corps, { async: false }),
-          texte: `${titre} ${meta.resume ?? ''} ${corps.replace(/[#*_>`\-[\]()]/g, ' ')}`,
+          texte: `${titre} ${meta.sousTitre ?? ''} ${meta.resume ?? ''} ${meta.dicton ?? ''} ${corps.replace(/[#*_>`\-[\]()]/g, ' ')}`,
         })
       } else if (type === 'registre') {
         pages.push(lireRegistre(base, meta, path.join(CONTENU, dossier), cp, cfg, csvs))
@@ -441,7 +454,9 @@ export function livrePourLecteur(complet: LivreComplet, ouvertes: Set<string>): 
   const fermees = new Set(complet.defs.filter((d) => d.prive && !ouvertes.has(d.id)).map((d) => d.id))
   const sections: Section[] = complet.defs.map(({ motDePasseEnv: _, ...s }) => ({ ...s, ouverte: s.prive && !fermees.has(s.id) }))
   const pages: Page[] = complet.pages.map((p) =>
-    fermees.has(p.section) ? { type: 'scellee', id: p.id, section: p.section, titre: p.titre, court: p.court, icone: p.icone, surtitre: p.surtitre } : p,
+    fermees.has(p.section)
+      ? { type: 'scellee', id: p.id, section: p.section, titre: p.titre, sousTitre: p.sousTitre, court: p.court, icone: p.icone, surtitre: p.surtitre }
+      : p,
   )
   const noms = [
     ...sections.map((s) => s.icone),

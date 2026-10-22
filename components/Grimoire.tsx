@@ -278,6 +278,20 @@ export default function Grimoire({ livre }: { livre: Livre }) {
     const id = decodeURIComponent(window.location.hash.slice(1))
     const i = pages.findIndex((p) => p.id === id)
     if (i > 0) setIndex(i)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // The open page stays open when the list of pages changes (a section unlocked, pages added before
+  // it): the page shown is looked up in the previous list, then found again in the new one.
+  const pagesAvant = useRef(pages)
+  useLayoutEffect(() => {
+    const avant = pagesAvant.current
+    pagesAvant.current = pages
+    if (avant === pages) return
+    const id = avant[indexRef.current]?.id
+    const i = id ? pages.findIndex((p) => p.id === id) : -1
+    if (i >= 0 && i !== indexRef.current) setIndex(i)
+    else if (indexRef.current >= pages.length) setIndex(pages.length - 1)
   }, [pages])
   useEffect(() => {
     window.history.replaceState(null, '', index === 0 ? window.location.pathname : `#${pages[index].id}`)
@@ -379,8 +393,8 @@ export default function Grimoire({ livre }: { livre: Livre }) {
           tranches={TRANCHES}
           recto={avant ? <PageDroite page={pages[m]} ctx={cm} /> : <PageGauche page={pages[m]} ctx={cm} />}
           verso={avant ? <PageGauche page={pages[suivante]} ctx={cs} /> : <PageDroite page={pages[suivante]} ctx={cs} />}
-          classeRecto={`page ${avant ? 'droite' : 'gauche'}`}
-          classeVerso={`page ${avant ? 'gauche' : 'droite'}`}
+          classeRecto={`page ${avant ? 'droite' : 'gauche'} page-${pages[m].type}`}
+          classeVerso={`page ${avant ? 'gauche' : 'droite'} page-${pages[suivante].type}`}
         />
       )
     })
@@ -544,7 +558,7 @@ export default function Grimoire({ livre }: { livre: Livre }) {
           <div className="feuillets" ref={feuillets} onPointerDown={debutGeste}>
             {etroit === null ? null : etroit ? (
               <>
-                <div className="page unique">
+                <div className={`page unique page-${pages[uniqueBase].type}`}>
                   <PageUnique key={pages[uniqueBase].id} page={pages[uniqueBase]} ctx={ctx(uniqueBase, !tourne)} />
                   {portee}
                 </div>
@@ -555,7 +569,7 @@ export default function Grimoire({ livre }: { livre: Livre }) {
                       tranches={TRANCHES_ETROIT}
                       recto={<PageUnique page={pages[uniqueVolet]} ctx={ctx(uniqueVolet, false)} />}
                       verso={null}
-                      classeRecto="page unique"
+                      classeRecto={`page unique page-${pages[uniqueVolet].type}`}
                       classeVerso="page unique dos"
                     />
                   </div>
@@ -563,11 +577,11 @@ export default function Grimoire({ livre }: { livre: Livre }) {
               </>
             ) : (
               <>
-                <div className="page gauche">
+                <div className={`page gauche page-${pages[gaucheBase].type}`}>
                   <PageGauche key={pages[gaucheBase].id} page={pages[gaucheBase]} ctx={ctx(gaucheBase, !tourne)} />
                   {portee}
                 </div>
-                <div className="page droite">
+                <div className={`page droite page-${pages[droiteBase].type}`}>
                   <PageDroite key={pages[droiteBase].id} page={pages[droiteBase]} ctx={ctx(droiteBase, !tourne)} />
                   {portee}
                 </div>

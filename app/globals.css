@@ -539,9 +539,12 @@ mark { background: var(--surligne); color: var(--encre-rouge); border-radius: 2p
   padding: 36px 52px 22px 48px;
 }
 .droite-contenu { padding: 32px 44px 22px 54px; }
-.gauche-contenu { overflow-y: auto; scrollbar-width: none; }
-.gauche-contenu::-webkit-scrollbar { display: none; }
-.gauche-contenu .folio { margin-top: auto; padding-top: 8px; }
+/* The left page scrolls inside its margins, as the right one does: the content is clipped within the
+   frame and never runs over the folio. */
+.gauche-contenu { overflow: hidden; }
+.defile-gauche { display: flex; flex-direction: column; scrollbar-width: none; }
+.defile-gauche::-webkit-scrollbar { display: none; }
+.gauche-contenu .folio { padding-top: 8px; }
 .unique-contenu { padding: 22px 22px 10px 24px; }
 
 .defile { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: rgba(90, 60, 30, 0.32) transparent; }
@@ -589,6 +592,9 @@ mark { background: var(--surligne); color: var(--encre-rouge); border-radius: 2p
   text-shadow: 0 1px 0 rgba(0, 0, 0, 0.6);
 }
 .signature { font-style: italic; text-align: right; color: var(--encre-douce); }
+/* A saying under the summary of a notes page (frontmatter "dicton" / "dictonAuteur"). */
+.dicton { margin-top: 26px; }
+.dicton .dicton-auteur { margin-top: 4px; font-size: 0.85em; font-style: normal; font-family: var(--f-capitales); letter-spacing: 0.06em; color: var(--encre-pale); }
 
 .recherche-locale { position: relative; display: block; margin: 6px auto 12px; max-width: 360px; }
 .recherche-locale .plume { position: absolute; left: 4px; top: 50%; width: 18px; height: 18px; translate: 0 -50%; color: var(--encre-douce); }
@@ -659,6 +665,10 @@ mark { background: var(--surligne); color: var(--encre-rouge); border-radius: 2p
 
 .titre-table { margin: 4px 0 12px; text-align: center; font-family: var(--f-gothique); font-weight: 400; font-size: 36px; }
 .table-matieres h4 { margin: 14px 0 4px; font-family: var(--f-capitales); font-weight: 400; font-size: 17px; letter-spacing: 0.1em; }
+/* Lines under the contents' heading (livre.json "sommaire.sousTitre") and under a section's title. */
+.sous-titre-table { margin: -10px 0 12px; text-align: center; }
+.table-matieres h4:has(+ .sous-titre-section) { margin-bottom: 0; }
+.sous-titre-section { margin: 0 0 4px; font-style: italic; font-size: 15px; color: var(--encre-pale); }
 .table-matieres ol { list-style: none; margin: 0; padding: 0; }
 .table-matieres button {
   display: flex;
@@ -793,6 +803,13 @@ mark { background: var(--surligne); color: var(--encre-rouge); border-radius: 2p
 .griffonnages span:nth-child(4) { width: 70%; }
 .griffonnages span:nth-child(5) { width: 40%; }
 
+/* ─── Page titles never push the medallion out of the page: the title shrinks with the room it has
+   (container units) and wraps; the line stays centred only while it fits (safe center). ─── */
+.contenu .en-tete { container-type: inline-size; }
+.contenu .titre-ligne { justify-content: safe center; padding-inline: 6px; }
+.contenu .titre-ligne .titre-page { min-width: 0; overflow-wrap: break-word; font-size: min(clamp(40px, 4.4vw, 60px), 12.5cqi); }
+.contenu .en-tete.compact .titre-page { font-size: min(40px, 11cqi); }
+
 /* ═══════════════════════════ Narrow screens ═══════════════════════════ */
 
 @media (max-width: 860px) {
@@ -873,6 +890,7 @@ mark { background: var(--surligne); color: var(--encre-rouge); border-radius: 2p
   .glyphe { width: 17px; height: 17px; }
   .coin { width: 44px; height: 44px; }
   .legende, .legende-sceaux, .decompte { display: none; }
+
 }
 
 @media (prefers-reduced-motion: reduce) {

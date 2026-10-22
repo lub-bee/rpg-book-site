@@ -1,10 +1,13 @@
 ---
 type: notes
 titre: Commander un grimoire
+sousTitre: Ordering a Grimoire
 court: Commander
 icone: quill-ink
 resume: Ce que Ri'Oblan demande avant d'apposer sa griffe, et ce que le client reçoit en échange de ses septims.
 auteur: Ri'Oblan, copiste
+dicton: Qui commande en hâte relit à loisir.
+dictonAuteur: Dicton des copistes
 citation: Une page bien copiée vaut mieux que dix pages bien racontées.
 ---
 

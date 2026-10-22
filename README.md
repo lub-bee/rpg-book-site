@@ -81,7 +81,7 @@ All visible text is French in the example, but any language works. Templates: `{
 | `pageDeTitre.consigne` | Date line, `{date}` = the day the book was built, in the book's calendar. Empty = none. |
 | `calendrier.fuseau` | Time zone of that date (e.g. `Asia/Tokyo`). |
 | `calendrier.mois` | The 12 month names of the book's world (leave out for the locale's months). |
-| `sommaire.*` | The title page's ribbon: `titre`, `court` (ribbon label), `couleur`, `icone`; `tableDesMatieres` (heading), `citation` (closing quote). |
+| `sommaire.*` | The title page's ribbon: `titre`, `court` (ribbon label), `couleur`, `icone`; `tableDesMatieres` (heading), `sousTitre` (line in italics under the heading, optional), `citation` (closing quote). |
 | `textes.recherche.*` | Global search: `placeholder`, `aide`, `effacer`, `trouvailles` (`{n}`), `rien`, `mentions` (`{n}`, hits in notes), `lignes` (`{n}`, hits in ledgers), `autres` (`{n}` more rows), `vide` (no hit). |
 | `textes.rechercheLocale.*` | Per-page ledger search: `placeholder`, `aide` (`{titre}`), `vides` (list of "nothing found" lines, picked in turn). |
 | `textes.signature` | Notes author line, `{auteur}`. |
@@ -110,10 +110,11 @@ All visible text is French in the example, but any language works. Templates: `{
 | Key | Meaning |
 |---|---|
 | `titre` | Section title (table of contents, header line of its pages). |
+| `sousTitre` | Line in italics under the section's title in the table of contents (e.g. its name in another language). |
 | `court` | Ribbon label (defaults to `titre`). |
 | `couleur` | Ribbon colour; also tints the illuminated initials and ornaments of its pages. |
 | `icone` | Ribbon icon ([Icons](#icons)). |
-| `surtitre` | Small caps line above each page title. `{section}` = section title, `{n}` = roman page number in the section. Default `{section}`. A page may override it with its own `surtitre`. |
+| `surtitre` | Small caps line above each page title. `{section}` = section title, `{n}` = roman page number in the section, `{chapitre}` = roman number among the section's chapters (a page with `chapitre: false` is left out of the count and gets `{section}` alone). Default `{section}`. A page may override it with its own `surtitre`. |
 | `prive` | `true` = private section ([Access](#access)). |
 | `motDePasseEnv` | Name of the env var holding this section's password. Default `LIVRE_MOT_DE_PASSE`. |
 | `serrure` | Overrides any key of `livre.json` `sectionPrivee` for this section. |
@@ -130,6 +131,8 @@ Every page is a Markdown file with a YAML frontmatter. Common keys:
 | `court` | Thumb tab label (defaults to `titre`). |
 | `icone` | Icon beside the title and on the tab. |
 | `surtitre` | Overrides the section's `surtitre` for this page. |
+| `sousTitre` | Line in italics under the title (e.g. the title in another language). |
+| `chapitre` | `false` leaves the page out of the section's `{chapitre}` count (a foreword, an interlude). |
 | `resume` | Paragraph under the title on the left page, with an illuminated initial. |
 | `citation` | Closing quote at the foot of the page. |
 
@@ -143,13 +146,16 @@ court: Commander
 icone: quill-ink
 resume: Ce que le copiste demande avant d'apposer sa griffe.
 auteur: Ri'Oblan, copiste
+dicton: Qui commande en hâte relit à loisir.
+dictonAuteur: Dicton des copistes
 citation: Une page bien copiée vaut mieux que dix pages bien racontées.
 ---
 
 Markdown body: ## headings, lists, **bold**, *italics*, > quotes.
 ```
 
-`auteur` adds the signature line (`textes.signature`). A `> quote` as the last paragraph of the body
+`auteur` adds the signature line (`textes.signature`). `dicton` is a saying shown under the summary on
+the left page, `dictonAuteur` who said it (both optional). A `> quote` as the last paragraph of the body
 also works as a closing quote. Notes are covered by the global search.
 
 ### `registre` — a ledger from a CSV
@@ -185,7 +191,8 @@ pied: Prix exprimés en septims d'or
 ```
 
 The CSV's first line names its columns (any names; case and accents are ignored when matching).
-Decimal point or quoted decimal comma (`"21,875"`) both work. Extra columns are ignored.
+Decimal point or quoted decimal comma (`"21,875"`) both work, and so do units or symbols typed around a
+number (`25 pièces`, `"12,5 ¤"`, `1 200`): the first number of the cell is kept. Extra columns are ignored.
 
 **Column kinds** (`colonnes`, in display order):
 
@@ -294,9 +301,9 @@ Fonts (`app/layout.tsx`).
 
 ## Where things are (for developers)
 
-`lib/config.ts` (livre.json schema), `lib/contenu.ts` (content loader, validation, server-side
-filtering of sealed sections), `lib/sceau.ts` (signed cookies), `middleware.ts` (cover / lock),
-`app/api/sceau` (book lock), `app/api/section` (section locks), `components/` (book, pages, leaves,
-iron), `app/globals.css` (all the look). Technical traps already solved are commented in place
-(faces swap at mid-turn, leaves over the brass corners, cover front face hidden past 90°, title page
-sized for short viewports).
+`lib/config.ts` (livre.json schema), `lib/contenu.ts` (content loader, validation, server-side filtering
+of sealed sections), `lib/sceau.ts` (signed cookies; also `signer` / `verifier`, a JSON value signed
+with `LIVRE_SECRET`, for future signed cookies), `middleware.ts` (cover / lock), `app/api/sceau` (book
+lock), `app/api/section` (section locks), `components/` (book, pages, leaves, iron), `app/globals.css`
+(all the look). Technical traps already solved are commented in place (faces swap at mid-turn, leaves
+over the brass corners, cover front face hidden past 90°, title page sized for short viewports).

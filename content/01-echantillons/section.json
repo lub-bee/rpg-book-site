@@ -1,9 +1,10 @@
 {
   "titre": "Registre d'échantillon",
+  "sousTitre": "Sample Ledger",
   "court": "Registre",
   "couleur": "#8a1c12",
   "icone": "coins",
-  "surtitre": "Registre d'échantillon · Feuillet {n}",
+  "surtitre": "Registre d'échantillon · Chapitre {chapitre}",
   "registre": {
     "donnees": "catalogue.csv",
     "sceau": {
