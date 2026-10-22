@@ -377,11 +377,11 @@ answers 404.
 The colophon ([Colophon](#colophon)) carries the same facts in character, at the end of the book and of
 its table of contents.
 
-- Showcase book « Copiste Ri'Oblan »: bound, ruled and copied by **Ri'Oblan**, emblem included.
+- Showcase book « Copiste Ri'Oblan »: bound, ruled and copied by **Ri'Oblan**, emblem included (made with GPT Image 2).
 - Icons: [game-icons.net](https://game-icons.net) (Lorc, Delapouite and contributors), CC BY 3.0
   (attribution required: a short line on the title page, and the colophon).
 - Textures: Poly Haven's wood_table, brown_leather and rusty_metal_04 (CC0) for `table.jpg`, `cuir.jpg` /
-  `cuir-impression.jpg` and `fer.jpg`; `parchemin-impression.jpg` (print parchment) is made for the project.
+  `cuir-impression.jpg` and `fer.jpg`; `parchemin-impression.jpg` (print parchment) is made for the project by Ri'Oblan and dedicated to the public domain (CC0 1.0), so reusers carry no non-commercial asset.
 - Fonts: UnifrakturMaguntia, IM Fell English / IM Fell English SC (SIL Open Font License, Google Fonts).
 - Licenses: code under MIT (`LICENSE`); the showcase content (texts, ledgers, emblem) under CC BY-NC 4.0,
   Ri'Oblan. `NOTICE.md` lists exactly what that covers and the third-party exceptions.

@@ -14,8 +14,13 @@ author, under the license they choose.
 
 - `content/`: the showcase book « Copiste Ri'Oblan »: the wording of `livre.json` (colophon included),
   the sections (`*/section.json`), the pages (`*/*.md`) and the ledgers (`*/*.csv`).
-- `content/embleme.svg`: the copyist's emblem.
-- `public/textures/parchemin-impression.jpg` (print parchment): made for the project.
+- `content/embleme.svg`: the copyist's emblem, by Ri'Oblan, made with GPT Image 2 and traced to SVG.
+
+## Dedicated to the public domain (CC0 1.0, Ri'Oblan)
+
+- `public/textures/parchemin-impression.jpg` (print parchment): made for the project and dedicated to the
+  public domain under [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/). Reusers of the template
+  may use it for any purpose, commercial or not, without attribution.
 
 ## Third-party assets (not covered above; their own licenses apply)
 
