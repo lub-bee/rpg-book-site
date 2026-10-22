@@ -405,9 +405,11 @@ export default function Grimoire({ livre }: { livre: Livre }) {
   const uniqueBase = tourne ? (avant ? tourne.vers : tourne.de) : index
   const uniqueVolet = tourne ? (avant ? tourne.de : tourne.vers) : null
   const portee = tourne ? <div className="ombre-portee" data-portee aria-hidden /> : null
+  const g = config.apparence.gaufrage
+  const gaufrage = (g ? { '--gaufrage': g.intensite, '--gaufrage-registres': g.registres } : undefined) as CSSProperties | undefined
 
   return (
-    <div className={`scene ${tourne?.manuel ? 'en-tourne' : ''}`}>
+    <div className={`scene ${tourne?.manuel ? 'en-tourne' : ''} ${config.apparence.gaufrage ? 'gaufrage' : ''}`} style={gaufrage}>
       <header className="entete">
         <div className="blason">
           <Embleme trace={embleme} taille={64} className="embleme-entete" style={{ transform: `rotate(${config.embleme.rotationEntete}deg)` }} />

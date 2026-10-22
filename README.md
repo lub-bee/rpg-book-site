@@ -68,6 +68,7 @@ All visible text is French in the example, but any language works. Templates: `{
 | `apparence.table` / `apparence.cuir` | Photo textures (paths under `public/`): the table, the cover leather. |
 | `apparence.voileCuir` | Two colours (top, bottom) of the tint laid over the leather photo. |
 | `apparence.dorure` | Four colours of the gold leaf (highlight, light gold, dark gold, reflected light): titles, emblem, fillets, favicon. |
+| `apparence.gaufrage` | The emblem blind-pressed into every page ([Blind-pressed emblem](#blind-pressed-emblem)). Absent or `false` = off; `true` or `{ "intensite": 0.7, "registres": 0.45 }` = on. |
 | `apparence.couleurs` | Palette (all optional): `table`, `cuir`, `cuirClair`, `cuirSombre` (open book's binding), `or`, `orPale`, `parchemin`, `encre`, `encreDouce`, `encrePale`, `encreRouge`. |
 | `couverture.titre` | Short title gilded on the cover. |
 | `couverture.salut` | Greeting on the first page, seen as the cover swings open. |
@@ -288,6 +289,15 @@ recompressed:
 Drop new files in `public/textures/` and point `livre.json` at them. The open book's binding uses the
 `cuir*` colours of `apparence.couleurs`.
 
+### Blind-pressed emblem
+
+`"apparence": { "gaufrage": { "intensite": 0.7, "registres": 0.45 } }` presses the book's emblem into
+every page, as if the paper had been pushed in: centred on the spine across a spread, larger than the
+page on phones. `intensite` (0 to 1) is its strength on most pages, `registres` on ledger pages (kept
+fainter so the rows stay legible); `true` takes these defaults. The relief is drawn from
+`content/embleme.svg` by `/gaufrage.svg` (no image to prepare) and laid as a static background, so
+turning pages costs nothing more.
+
 ### Fonts
 
 UnifrakturMaguntia (titles), IM Fell English and IM Fell English SC (text, small caps), from Google
@@ -304,6 +314,7 @@ Fonts (`app/layout.tsx`).
 `lib/config.ts` (livre.json schema), `lib/contenu.ts` (content loader, validation, server-side filtering
 of sealed sections), `lib/sceau.ts` (signed cookies; also `signer` / `verifier`, a JSON value signed
 with `LIVRE_SECRET`, for future signed cookies), `middleware.ts` (cover / lock), `app/api/sceau` (book
-lock), `app/api/section` (section locks), `components/` (book, pages, leaves, iron), `app/globals.css`
-(all the look). Technical traps already solved are commented in place (faces swap at mid-turn, leaves
-over the brass corners, cover front face hidden past 90°, title page sized for short viewports).
+lock), `app/api/section` (section locks), `app/gaufrage.svg` (blind-pressed emblem), `components/`
+(book, pages, leaves, iron), `app/globals.css` (all the look). Technical traps already solved are
+commented in place (faces swap at mid-turn, leaves over the brass corners, cover front face hidden past
+90°, title page sized for short viewports).

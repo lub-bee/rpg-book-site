@@ -810,6 +810,25 @@ mark { background: var(--surligne); color: var(--encre-rouge); border-radius: 2p
 .contenu .titre-ligne .titre-page { min-width: 0; overflow-wrap: break-word; font-size: min(clamp(40px, 4.4vw, 60px), 12.5cqi); }
 .contenu .en-tete.compact .titre-page { font-size: min(40px, 11cqi); }
 
+/* ─── The emblem blind-pressed into every page (livre.json "apparence.gaufrage", image /gaufrage.svg
+   drawn from the book's emblem): a static background layer under the page's content, centred on the
+   spine on a spread (each page shows its half, cut by the edges), larger than the page on phones.
+   Ledgers get a fainter press, for legibility. ─── */
+.gaufrage .page::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: url('/gaufrage.svg') no-repeat center / auto 128%;
+  opacity: var(--gaufrage, 0.7);
+}
+.gaufrage .page.gauche::after { right: -100%; }
+.gaufrage .page.droite::after { left: -100%; }
+.gaufrage .page.unique::after { background-size: auto 122%; }
+.gaufrage .page.page-registre::after { opacity: var(--gaufrage-registres, 0.45); }
+.gaufrage .page.dos::after { display: none; }
+
 /* ═══════════════════════════ Narrow screens ═══════════════════════════ */
 
 @media (max-width: 860px) {

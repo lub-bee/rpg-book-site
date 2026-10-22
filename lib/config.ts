@@ -34,6 +34,8 @@ export type Config = {
     voileCuir: string[]
     dorure: string[]
     couleurs: Record<string, string>
+    /** The emblem blind-pressed into every page (off when null): opacity of the relief, 0 to 1. */
+    gaufrage: { intensite: number; registres: number } | null
   }
   couverture: { titre: string; salut: string; invite: string; onglet: string; ouvrir: string }
   serrure: TextesSerrure
@@ -131,6 +133,19 @@ function lire(v: unknown): Config {
   if (voileCuir.length !== 2) c.erreur('apparence.voileCuir', 'must list exactly 2 colours (top and bottom of the tint laid over the leather)')
   const mois = c.textes(calendrier, 'mois', 'calendrier', [])
 
+  // Optional switches: absent or false = off; true or an object = on (an object may tune it).
+  const active = (v: unknown, chemin: string): Obj | null => {
+    if (v === undefined || v === false) return null
+    if (v === true) return {}
+    return c.objet(v, chemin)
+  }
+  const g = active(apparence.gaufrage, 'apparence.gaufrage')
+  const gaufrage = g && { intensite: c.nombre(g, 'intensite', 'apparence.gaufrage', 0.7), registres: c.nombre(g, 'registres', 'apparence.gaufrage', 0.45) }
+  for (const k of ['intensite', 'registres'] as const) {
+    if (gaufrage && (gaufrage[k] < 0 || gaufrage[k] > 1)) c.erreur(`apparence.gaufrage.${k}`, 'must be between 0 and 1')
+  }
+  if (mois.length && mois.length !== 12) c.erreur('calendrier.mois', 'must list the 12 month names (or be left out)')
+
   const credits = c.textes(r, 'credits', '')
   if (!credits.some((x) => /game-icons/i.test(x))) {
     c.erreur('credits', 'must credit game-icons.net (the icons are CC BY 3.0: attribution is required)')
@@ -152,6 +167,7 @@ function lire(v: unknown): Config {
       voileCuir,
       dorure,
       couleurs: couleurs as Record<string, string>,
+      gaufrage,
     },
     couverture: {
       titre: c.texte(couverture, 'titre', 'couverture'),

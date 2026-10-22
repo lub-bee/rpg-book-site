@@ -30,7 +30,8 @@
       "encreDouce": "#573c24",
       "encrePale": "#876a47",
       "encreRouge": "#8e1f14"
-    }
+    },
+    "gaufrage": { "intensite": 0.7, "registres": 0.45 }
   },
 
   "couverture": {
