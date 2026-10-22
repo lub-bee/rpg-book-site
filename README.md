@@ -90,6 +90,7 @@ All visible text is French in the example, but any language works. Templates: `{
 | `textes.coins.*` | Page corners: `precedente`, `suivante` (accessible names), `aidePrecedente`, `aideSuivante` (tooltips). |
 | `textes.navigation.rubans` / `.onglets` | Accessible names of the ribbons and tabs. |
 | `egare.titre` / `.texte` / `.retour` | The "torn page" (404). |
+| `modules.copie` | Printable copy of the book ([Printable copy](#printable-copy)). Absent or `false` = off. |
 | `credits` | Lines of the colophon on the title page. **Must credit game-icons.net** (CC BY 3.0): the book refuses to load otherwise. |
 
 ## `section.json`
@@ -303,6 +304,37 @@ turning pages costs nothing more.
 UnifrakturMaguntia (titles), IM Fell English and IM Fell English SC (text, small caps), from Google
 Fonts (`app/layout.tsx`).
 
+## Printable copy
+
+```json
+"modules": {
+  "copie": {
+    "titre": "Livre d'échantillons de Ri'Oblan",
+    "aide": "Faire une copie du livre",
+    "icone": "quill-ink",
+    "retour": "Retourner au livre",
+    "recopier": "Recopier encore",
+    "fin": "Ici s'arrête la copie. Le copiste en garde l'original.",
+    "cuir": "/textures/cuir-impression.jpg"
+  }
+}
+```
+
+A gilded quill beside the search (`icone`, tooltip `aide`) opens `/copie` in a new tab: the whole book
+laid out on A4 sheets (leather front board, title page, contents, every page in order, back board),
+and the print dialog opens by itself: "Save as PDF" is the export. `titre` is the document title (the
+default PDF file name), `retour` / `recopier` the links above the sheets on screen, `fin` an optional
+closing line. `cuir` is the leather photo of the printed boards (default: `apparence.cuir`); a lighter
+copy keeps the PDF small:
+
+```sh
+sips -Z 1280 -s formatOptions 70 public/textures/cuir.jpg --out public/textures/cuir-impression.jpg   # macOS
+```
+
+The copy is made from the reader's view of the book: a private section the reader has not unlocked is
+copied sealed (title and lock wording only), its pages never sent. Without `modules.copie`, `/copie`
+answers 404.
+
 ## Credits
 
 - Icons: game-icons.net, CC BY 3.0 (attribution required, shown on the title page).
@@ -314,7 +346,8 @@ Fonts (`app/layout.tsx`).
 `lib/config.ts` (livre.json schema), `lib/contenu.ts` (content loader, validation, server-side filtering
 of sealed sections), `lib/sceau.ts` (signed cookies; also `signer` / `verifier`, a JSON value signed
 with `LIVRE_SECRET`, for future signed cookies), `middleware.ts` (cover / lock), `app/api/sceau` (book
-lock), `app/api/section` (section locks), `app/gaufrage.svg` (blind-pressed emblem), `components/`
-(book, pages, leaves, iron), `app/globals.css` (all the look). Technical traps already solved are
+lock), `app/api/section` (section locks), `app/copie` + `components/Copie.tsx` (printable copy),
+`app/gaufrage.svg` (blind-pressed emblem), `components/` (book, pages, leaves, iron, `Couverture.tsx`
+the closed book's boards), `app/globals.css` (all the look). Technical traps already solved are
 commented in place (faces swap at mid-turn, leaves over the brass corners, cover front face hidden past
 90°, title page sized for short viewports).

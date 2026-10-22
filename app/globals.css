@@ -227,6 +227,35 @@ mark { background: var(--surligne); color: var(--encre-rouge); border-radius: 2p
 .index-plus { padding: 2px 42px; font-style: italic; font-size: 13px; color: var(--encre-pale); }
 .index-vide { margin: 8px 12px; font-style: italic; color: var(--encre-douce); }
 
+/* The printable copy (livre.json "modules.copie"): a gilded quill beside the search. Absolutely
+   positioned so that nothing else in the header moves: beside the field on wide screens, under its
+   right end when the header is tight, next to the iron key on narrow screens. */
+.lien-copie {
+  position: absolute;
+  left: calc(100% + 18px);
+  top: 50%;
+  translate: 0 -50%;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.75)) drop-shadow(0 0 10px rgba(232, 170, 80, 0.22));
+  transition: filter 220ms ease, transform 260ms cubic-bezier(.3, 1.4, .5, 1);
+}
+.lien-copie-defs { position: absolute; width: 0; height: 0; }
+.lien-copie .icone { width: 32px; height: 32px; }
+.lien-copie .icone path { fill: url(#copie-or); }
+.lien-copie:hover, .lien-copie:focus-visible {
+  outline: none;
+  transform: rotate(-8deg) translateY(-1px);
+  filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.75)) drop-shadow(0 0 14px rgba(240, 190, 100, 0.55));
+}
+@media (min-width: 861px) and (max-width: 1139px) {
+  .lien-copie { left: auto; right: 2px; top: calc(100% + 10px); translate: none; width: 36px; height: 36px; }
+  .lien-copie .icone { width: 28px; height: 28px; }
+}
+
 
 /* ═══════════════════════════ Book ═══════════════════════════ */
 
@@ -910,6 +939,8 @@ mark { background: var(--surligne); color: var(--encre-rouge); border-radius: 2p
   .coin { width: 44px; height: 44px; }
   .legende, .legende-sceaux, .decompte { display: none; }
 
+  .lien-copie { left: auto; right: 54px; top: auto; bottom: calc(100% + 14px); translate: none; width: 34px; height: 34px; }
+  .lien-copie .icone { width: 28px; height: 28px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1217,4 +1248,177 @@ mark { background: var(--surligne); color: var(--encre-rouge); border-radius: 2p
   .serrure-section { min-height: 0; padding: 26px 0 8px; }
   .serrure-section-fourreau { margin: 12px 0 0; padding: 8px 0; }
   .serrure-section .cle-tige { font-size: 13px; padding: 0 6px; }
+}
+
+/* ═══════════════════════════ Printable copy (/copie, saved as a PDF) ═══════════════════════════ */
+
+.copie { position: relative; z-index: 1; width: min(210mm, 100%); margin: 0 auto; padding: 18px 16px 40px; color: var(--encre); font-size: 11.5pt; }
+.copie-retour { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 0 0 14px; font-family: var(--f-capitales); letter-spacing: 0.06em; }
+.copie-retour a { color: var(--or-pale); text-decoration: none; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8); }
+.copie-retour a:hover { color: var(--dorure-1); }
+.copie-retour button { border: 1px solid color-mix(in srgb, var(--or) 55%, transparent); border-radius: 3px; background: rgba(40, 20, 8, 0.55); color: var(--or-pale); font-family: var(--f-capitales); letter-spacing: 0.06em; padding: 4px 12px; }
+.copie-retour button:hover { background: rgba(90, 44, 20, 0.7); }
+
+/* On screen: each page is a sheet of parchment laid on the table. */
+.feuille {
+  position: relative;
+  margin: 0 0 26px;
+  padding: 16mm 15mm 14mm;
+  background-color: var(--parchemin);
+  background-image: var(--taches), var(--grain);
+  box-shadow: inset 0 0 50px rgba(130, 80, 25, 0.28), 0 16px 34px rgba(0, 0, 0, 0.6);
+  border-radius: 2px;
+}
+.feuille::before {
+  content: '';
+  position: absolute;
+  inset: 5mm;
+  border: 1px solid rgba(120, 60, 30, 0.32);
+  outline: 1px solid rgba(120, 60, 30, 0.16);
+  outline-offset: 3px;
+  pointer-events: none;
+}
+
+.copie .titre-page { font-size: 34pt; }
+.copie .surtitre { font-size: 9.5pt; }
+.copie .sous-titre { font-size: 12.5pt; }
+.copie .medaillon { --t: 15mm; }
+.copie .intro { font-size: 12pt; margin-bottom: 6px; }
+.copie .intro.lettrine { display: flow-root; }
+.copie .decompte { font-size: 10.5pt; margin: 2px 0 8px; }
+.copie .legende { font-size: 10.5pt; margin-bottom: 8px; }
+.copie .signature { font-size: 11pt; }
+.copie .dicton { margin-top: 12px; }
+
+/* Title page */
+.feuille-titre { min-height: 262mm; display: flex; flex-direction: column; justify-content: center; }
+.copie .frontispice-embleme { height: 62mm; width: auto; animation: none; }
+.copie .frontispice-sur { font-size: 13pt; margin-top: 14px; }
+.copie .frontispice-titre { font-size: 40pt; }
+.copie .frontispice .fleuron { margin: 14px auto; }
+.copie .citation { font-size: 14pt; }
+.copie .frontispice-texte { font-size: 12pt; max-width: 120mm; }
+.copie .consigne { font-size: 10pt; margin-top: 18px; }
+.copie .colophon { font-size: 9pt; }
+
+/* Contents */
+.copie-sommaire { max-width: 140mm; margin: 0 auto; }
+.copie-sommaire h4 { font-size: 13pt; }
+.copie-sommaire a { display: flex; align-items: baseline; gap: 6px; padding: 2px 4px; color: inherit; text-decoration: none; font-size: 12.5pt; }
+.copie-sommaire .renvoi { font-size: 10.5pt; min-width: 9mm; }
+.copie-sommaire + .citation-fin { max-width: 140mm; margin-left: auto; margin-right: auto; }
+
+/* Ledgers, as real tables so the printed header repeats on every sheet. */
+.copie-registre-table { width: 100%; border-collapse: collapse; margin-top: 4px; }
+.copie-registre-table thead th {
+  padding: 2px 3px 5px;
+  font-family: var(--f-capitales);
+  font-weight: 400;
+  font-size: 10.5pt;
+  letter-spacing: 0.06em;
+  color: var(--encre-rouge);
+  text-align: right;
+  border-bottom: 3px double rgba(142, 31, 20, 0.5);
+}
+.copie-registre-table thead th.col-libelle { text-align: left; }
+.copie-registre-table td { padding: 3px 3px 2px; vertical-align: top; border-bottom: 1px solid rgba(110, 80, 45, 0.16); }
+.copie-registre-table tr { break-inside: avoid; }
+/* Never leave a lone row (or the foot of the ledger) alone at the top of a sheet. */
+.copie-registre-table tbody tr:last-child, .copie .registre-pied { break-before: avoid; }
+.copie-registre-table .col-glyphe { width: 7mm; padding-right: 0; }
+.copie-registre-table .glyphe { width: 15px; height: 15px; }
+.copie-registre-table .noms { display: table-cell; }
+.copie-registre-table .noms > span { display: block; }
+.copie-registre-table .copie-nom { display: flex; align-items: baseline; gap: 6px; }
+.copie-nom .points-conduite { flex: 1; min-width: 12px; margin: 0; height: 4px; }
+.copie .nom-fr { font-size: 12pt; }
+.copie .nom-en { font-size: 10pt; }
+.copie .note-article { font-size: 9pt; }
+.copie-registre-table .valeur { white-space: nowrap; font-size: 12pt; }
+.copie-registre-table .valeur.ton-pale, .copie-registre-table .valeur-texte { font-size: 10.5pt; padding-top: 5px; white-space: normal; }
+.copie-registre-table .si-vide { font-size: 11pt; }
+.copie .registre-pied { font-size: 9pt; margin-top: 10px; }
+.copie .legende-sceaux { font-size: 9.5pt; margin-top: 4px; }
+.copie .legende-sceaux .glyphe { width: 14px; height: 14px; }
+
+/* Notes, pages to come, sealed pages */
+.copie .prose { font-size: 12pt; line-height: 1.5; padding: 0; }
+.copie .prose > p:first-child { display: flow-root; }
+.copie .prose h2 { font-size: 19pt; break-after: avoid; }
+.copie .prose blockquote, .copie .citation-fin { font-size: 12.5pt; break-inside: avoid; }
+.copie-attente { margin: 14mm auto 4mm; max-width: 120mm; text-align: center; font-style: italic; font-size: 12.5pt; color: var(--encre-douce); }
+
+.copie-fin { margin: 10px 0 0; text-align: center; font-style: italic; font-size: 12pt; color: var(--or-pale); text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8); }
+.copie-fin .fleuron { color: var(--or); }
+
+/* Front and back boards: the cover page's closed book (components/Couverture.tsx), laid on the table
+   on screen and scaled to the whole sheet in print. Its leather comes from "modules.copie.cuir". */
+.copie-couverture { position: relative; z-index: 2; display: flex; justify-content: center; margin: 0 0 26px; }
+.couverture-imprimee {
+  /* The cover page's geometry (see .seuil) for a 360px-wide board at the A4 ratio. */
+  --tome-l: 360px;
+  --cle-l: 340px;
+  --plaque: calc(var(--cle-l) * 84 / 340);
+  --y-trou: calc(var(--tome-l) * 1.4142 * 0.5);
+  /* The plate straddles the fore-edge only as far as the sheet allows: its keyhole stays whole. */
+  --marge-serrure: -26px;
+  position: relative;
+  width: var(--tome-l);
+  height: calc(var(--tome-l) * 1.4142);
+  box-shadow: 0 26px 50px rgba(0, 0, 0, 0.75), 0 6px 14px rgba(0, 0, 0, 0.55);
+  border-radius: 4px 10px 10px 4px;
+}
+.couverture-imprimee .tome-couverture { backface-visibility: visible; -webkit-backface-visibility: visible; }
+.tome-dos { border-radius: 10px 4px 4px 10px; }
+.copie-dos .couverture-imprimee { border-radius: 10px 4px 4px 10px; }
+.tome-dos .tome-charniere { left: auto; right: 0; transform: scaleX(-1); }
+.tome-dos .tome-cadre { inset: 28px 46px 28px 26px; }
+.tome-dos-embleme { position: absolute; left: 50%; top: 72%; translate: -50% -50%; }
+
+/* No sheet margin: the parchment covers the whole sheet; each page pads every sheet it spans instead. */
+@page { size: A4; margin: 0; }
+
+@media print {
+  /* The paper colour and the ink must survive "background graphics: off" defaults. */
+  html, body, .copie, .copie * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  /* The --taches stains baked into a light JPEG tile (public/textures/parchemin-impression.jpg): the live
+     SVG filter would be rasterised again on every sheet and weigh megabytes. */
+  html:has(.copie), body:has(.copie) { background: var(--parchemin) url('/textures/parchemin-impression.jpg'); background-size: 640px 640px; }
+  body:has(.copie)::before, body:has(.copie)::after { display: none; }
+  .copie { width: auto; padding: 0; font-size: 11pt; }
+  .copie-retour { display: none; }
+  .feuille {
+    margin: 0;
+    padding: 17mm 19mm 16mm;
+    background: none;
+    box-shadow: none;
+    border-radius: 0;
+    break-before: page;
+    /* The padding is repeated on every sheet a long page spans. */
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+  .copie-couverture { display: block; width: 210mm; height: 297mm; margin: 0; overflow: hidden; }
+  .copie-dos { break-before: page; }
+  /* 360px board × 2.2047 = 210mm: the whole sheet, edge to edge. */
+  .couverture-imprimee { zoom: 2.2047; box-shadow: none; border-radius: 0; }
+  .couverture-imprimee .tome-couverture { border-radius: 0; }
+  .feuille::before { display: none; }
+  /* Ruled double frame repeated on every printed sheet. */
+  .copie::before {
+    content: '';
+    position: fixed;
+    inset: 8mm;
+    border: 1px solid rgba(120, 60, 30, 0.32);
+    outline: 1px solid rgba(120, 60, 30, 0.16);
+    outline-offset: 3px;
+    pointer-events: none;
+  }
+  .feuille-titre { min-height: 290mm; }
+  /* The narrow print width falls under the narrow-screen rules: bring back what they hide. */
+  .copie .decompte, .copie .legende { display: block; }
+  .copie .legende-sceaux { display: flex; }
+  .copie-fin { color: var(--encre-douce); text-shadow: none; break-inside: avoid; }
+  .copie-fin .fleuron { color: var(--encre-rouge); }
+  .copie a { color: inherit; text-decoration: none; }
 }

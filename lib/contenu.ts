@@ -462,6 +462,7 @@ export function livrePourLecteur(complet: LivreComplet, ouvertes: Set<string>): 
     ...sections.map((s) => s.icone),
     ...pages.flatMap((p) => [p.icone, ...(p.type === 'registre' ? p.sceaux.map((x) => x.icone) : [])]),
     ...(sections.some((s) => s.prive) ? [ICONE_RESCELLER] : []),
+    ...(complet.config.modules.copie ? [complet.config.modules.copie.icone] : []),
   ]
   return { config: complet.config, sections, pages, consigneLe: complet.consigneLe, embleme: complet.embleme, icones: icones(noms) }
 }

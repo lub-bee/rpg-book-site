@@ -61,6 +61,20 @@ export type Config = {
     coins: { precedente: string; suivante: string; aidePrecedente: string; aideSuivante: string }
     navigation: { rubans: string; onglets: string }
   }
+  /** Optional modules: null = off. */
+  modules: {
+    /** Printable copy of the book (/copie), saved as a PDF by the browser. */
+    copie: {
+      titre: string
+      aide: string
+      icone: string
+      retour: string
+      recopier: string
+      fin: string
+      /** Leather photo of the printed covers (a lighter file keeps the PDF small). */
+      cuir: string
+    } | null
+  }
   egare: { titre: string; texte: string; retour: string }
   credits: string[]
 }
@@ -125,6 +139,7 @@ function lire(v: unknown): Config {
   const coins = c.objet(textes.coins, 'textes.coins')
   const navigation = c.objet(textes.navigation, 'textes.navigation')
   const egare = c.objet(r.egare, 'egare')
+  const modules = c.objet(r.modules, 'modules', true)
   const sectionPrivee = c.objet(r.sectionPrivee, 'sectionPrivee')
 
   const dorure = c.textes(apparence, 'dorure', 'apparence')
@@ -144,6 +159,7 @@ function lire(v: unknown): Config {
   for (const k of ['intensite', 'registres'] as const) {
     if (gaufrage && (gaufrage[k] < 0 || gaufrage[k] > 1)) c.erreur(`apparence.gaufrage.${k}`, 'must be between 0 and 1')
   }
+  const copie = active(modules.copie, 'modules.copie')
   if (mois.length && mois.length !== 12) c.erreur('calendrier.mois', 'must list the 12 month names (or be left out)')
 
   const credits = c.textes(r, 'credits', '')
@@ -225,6 +241,17 @@ function lire(v: unknown): Config {
         aideSuivante: c.texte(coins, 'aideSuivante', 'textes.coins'),
       },
       navigation: { rubans: c.texte(navigation, 'rubans', 'textes.navigation'), onglets: c.texte(navigation, 'onglets', 'textes.navigation') },
+    },
+    modules: {
+      copie: copie && {
+        titre: c.texte(copie, 'titre', 'modules.copie'),
+        aide: c.texte(copie, 'aide', 'modules.copie'),
+        icone: c.texte(copie, 'icone', 'modules.copie', 'quill-ink'),
+        retour: c.texte(copie, 'retour', 'modules.copie'),
+        recopier: c.texte(copie, 'recopier', 'modules.copie'),
+        fin: c.texte(copie, 'fin', 'modules.copie', ''),
+        cuir: c.texte(copie, 'cuir', 'modules.copie', c.texte(apparence, 'cuir', 'apparence')),
+      },
     },
     egare: { titre: c.texte(egare, 'titre', 'egare'), texte: c.texte(egare, 'texte', 'egare'), retour: c.texte(egare, 'retour', 'egare') },
     credits,

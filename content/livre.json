@@ -117,6 +117,18 @@
     "navigation": { "rubans": "Sections du livre", "onglets": "Pages de la section" }
   },
 
+  "modules": {
+    "copie": {
+      "titre": "Livre d'échantillons de Ri'Oblan",
+      "aide": "Faire une copie du livre",
+      "icone": "quill-ink",
+      "retour": "Retourner au livre",
+      "recopier": "Recopier encore",
+      "fin": "Ici s'arrête la copie. Le copiste en garde l'original.",
+      "cuir": "/textures/cuir-impression.jpg"
+    }
+  },
+
   "egare": {
     "titre": "Page arrachée",
     "texte": "Quelqu'un a déchiré cette page du livre. Le copiste soupçonne les rats d'égout de Faillaise.",

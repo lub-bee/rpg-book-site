@@ -407,6 +407,7 @@ export default function Grimoire({ livre }: { livre: Livre }) {
   const portee = tourne ? <div className="ombre-portee" data-portee aria-hidden /> : null
   const g = config.apparence.gaufrage
   const gaufrage = (g ? { '--gaufrage': g.intensite, '--gaufrage-registres': g.registres } : undefined) as CSSProperties | undefined
+  const copie = config.modules.copie
 
   return (
     <div className={`scene ${tourne?.manuel ? 'en-tourne' : ''} ${config.apparence.gaufrage ? 'gaufrage' : ''}`} style={gaufrage}>
@@ -474,6 +475,22 @@ export default function Grimoire({ livre }: { livre: Livre }) {
             >
               ✕
             </button>
+          )}
+          {copie && (
+            // Out of the layout flow (absolute): opens the printable copy of the book in a new tab.
+            <a className="lien-copie" href="/copie" target="_blank" rel="noopener" title={copie.aide} aria-label={copie.aide}>
+              <svg width="0" height="0" aria-hidden className="lien-copie-defs">
+                <defs>
+                  <linearGradient id="copie-or" x1="0" y1="0" x2="0.35" y2="1">
+                    <stop offset="0%" style={{ stopColor: 'var(--dorure-1)' }} />
+                    <stop offset="30%" style={{ stopColor: 'var(--dorure-2)' }} />
+                    <stop offset="62%" style={{ stopColor: 'var(--dorure-3)' }} />
+                    <stop offset="100%" style={{ stopColor: 'var(--dorure-4)' }} />
+                  </linearGradient>
+                </defs>
+              </svg>
+              <Icone corps={icones[copie.icone]} />
+            </a>
           )}
           {indexOuvert && requete && (
             <div className="index-recherche" role="listbox">

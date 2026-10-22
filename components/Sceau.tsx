@@ -4,8 +4,9 @@ import { useRef, useState } from 'react'
 import type { Config } from '@/lib/config'
 import type { Embleme as Trace } from '@/lib/types'
 import { COOKIE_OUVERT } from '@/lib/sceau'
-import { CoinLaiton, Embleme, Fleuron } from './Ornements'
-import { Cle, Serrure } from './Fer'
+import { Fleuron } from './Ornements'
+import { Cle } from './Fer'
+import { FaceCouverture } from './Couverture'
 
 type Etat = 'repos' | 'essai' | 'refus' | 'ouvert'
 
@@ -72,26 +73,11 @@ export default function Sceau({ config, embleme }: { config: Config; embleme: Tr
           </div>
           <div className="tome-battant">
             <div className="tome-doublure" aria-hidden />
-            <div className="tome-couverture">
-              <div className="tome-charniere" aria-hidden />
-              <CoinLaiton className="hg" />
-              <CoinLaiton className="bg" />
-              <CoinLaiton className="hd" />
-              <CoinLaiton className="bd" />
-              <div className="tome-cadre">
-                <Embleme trace={embleme} taille={150} className="tome-embleme" />
-                <h1 className="tome-titre">{config.couverture.titre}</h1>
-                <Fleuron className="tome-fleuron" />
-              </div>
-              {!publique && (
-                <div className="fermoir" aria-hidden>
-                  <Serrure />
-                </div>
-              )}
+            <FaceCouverture titre={config.couverture.titre} embleme={embleme} serrure={!publique}>
               {publique && (
                 <button type="button" className="tome-ouvrir" onClick={ouvrir} disabled={etat !== 'repos'} aria-label={config.couverture.ouvrir} title={config.couverture.ouvrir} autoFocus />
               )}
-            </div>
+            </FaceCouverture>
           </div>
         </div>
 
