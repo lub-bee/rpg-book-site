@@ -8,6 +8,7 @@ import { PageDroite, PageGauche, PageUnique, type Ctx } from './Pages'
 import { CoinLaiton, Embleme, Icone, Plume } from './Ornements'
 import { animerFeuillet, animerPortee, Feuillet } from './Feuillet'
 import { CleRefermer, Verrou } from './Fer'
+import { Fiche } from './Fiche'
 
 type Tourne = { de: number; vers: number; manuel: boolean }
 type Resultat = { i: number; page: Page; total: number; lignes: Ligne[] }
@@ -75,6 +76,8 @@ export default function Grimoire({ livre }: { livre: Livre }) {
   const [locales, setLocales] = useState<Record<string, string>>({})
   const [cible, setCible] = useState<string | null>(null)
   const [indexOuvert, setIndexOuvert] = useState(false)
+  /** Ledger row whose detail is pinned on the left page (the slip). */
+  const [fiche, setFiche] = useState<{ page: string; ligne: string } | null>(null)
   const scrolls = useRef<Record<string, number>>({})
   const feuillets = useRef<HTMLDivElement>(null)
   const volets = useRef<HTMLDivElement>(null)
@@ -348,6 +351,10 @@ export default function Grimoire({ livre }: { livre: Livre }) {
     return () => window.removeEventListener('keydown', f)
   }, [aller])
 
+  // A slip goes when the page turns.
+  const destinationFiche = tourne?.vers ?? index
+  useEffect(() => setFiche(null), [destinationFiche])
+
   const refermer = async () => {
     await fetch('/api/sceau', { method: 'DELETE' })
     window.location.href = '/sceau'
@@ -368,7 +375,37 @@ export default function Grimoire({ livre }: { livre: Livre }) {
       cible: interactif ? cible : null,
       scrollInitial: scrolls.current[id],
       onScroll: interactif ? (v) => (scrolls.current[id] = v) : undefined,
+      ouvrirFiche: interactif
+        ? (ligne) => {
+            if (clicIgnore.current) return
+            setFiche((f) => (f?.page === id && f.ligne === ligne ? null : { page: id, ligne }))
+          }
+        : undefined,
+      fiche: interactif && fiche?.page === id ? fiche.ligne : null,
     }
+  }
+
+  /** The slip of the pinned ledger row, laid on the left page (or over the screen's foot on phones). */
+  const feuilleVolante = (mobile: boolean) => {
+    if (!fiche || tourne || !t.fiche) return null
+    const page = pages.find((p) => p.id === fiche.page)
+    const ligne = page?.type === 'registre' ? page.lignes.find((l) => l.id === fiche.ligne) : undefined
+    if (!page || !ligne?.detail) return null
+    return (
+      <Fiche
+        key={`${page.id}/${ligne.id}`}
+        surtitre={page.titre}
+        titre={ligne.libelle}
+        sousTitre={ligne.libelle2}
+        ranger={t.fiche.ranger}
+        teinte={sections.find((s) => s.id === page.section)?.couleur}
+        mobile={mobile}
+        sansAnimation={Boolean(sansAnimation)}
+        fermer={() => setFiche(null)}
+      >
+        <div className="prose fiche-prose" dangerouslySetInnerHTML={{ __html: ligne.detail }} />
+      </Fiche>
+    )
   }
 
   const destination = tourne?.vers ?? index
@@ -628,9 +665,11 @@ export default function Grimoire({ livre }: { livre: Livre }) {
               disabled={destination === pages.length - 1}
               onClick={() => !clicIgnore.current && aller(destination + 1)}
             />
+            {etroit === false && feuilleVolante(false)}
           </div>
         </div>
       </main>
+      {etroit && feuilleVolante(true)}
     </div>
   )
 }

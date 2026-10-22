@@ -777,6 +777,21 @@ mark { background: var(--surligne); color: var(--encre-rouge); border-radius: 2p
 .glyphe .icone { width: 100%; height: 100%; }
 .legende-sceaux .glyphe { margin-top: 0; width: 18px; height: 18px; }
 
+/* A row with a detail (a "detail" column) opens it on a pinned slip: a brass pin after its name. */
+.ligne.avec-detail { cursor: pointer; }
+.ligne.avec-detail:focus-visible { outline: none; background: rgba(201, 162, 78, 0.18); }
+.ligne.epinglee { background: rgba(201, 162, 78, 0.2); }
+.epingle-detail {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-left: 7px;
+  vertical-align: 0.15em;
+  border-radius: 50%;
+  background: radial-gradient(circle at 34% 30%, #fff1c2, var(--or) 42%, #6b4a14 88%);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.45);
+}
+
 .ligne.cible { animation: dorure 2.4s ease both; }
 @keyframes dorure {
   0%, 100% { background: transparent; box-shadow: none; }
@@ -857,6 +872,118 @@ mark { background: var(--surligne); color: var(--encre-rouge); border-radius: 2p
 .gaufrage .page.unique::after { background-size: auto 122%; }
 .gaufrage .page.page-registre::after { opacity: var(--gaufrage-registres, 0.45); }
 .gaufrage .page.dos::after { display: none; }
+
+/* ═══════════════════════════ Pinned slip (components/Fiche.tsx) ═══════════════════════════
+   Loose rag paper pinned on the left page with a brass pin. It unrolls and rolls back up with
+   transforms and opacity only: clipping and no hit-testing only while it moves; the layers are kept
+   for the slip's lifetime (no re-raster when an unroll starts or ends). */
+
+.fiche {
+  position: absolute;
+  z-index: 13;
+  top: 20px;
+  left: 30px;
+  width: calc(50% - 64px);
+  max-height: calc(100% - 40px);
+  display: flex;
+  flex-direction: column;
+  color: var(--encre);
+  font-size: 16px;
+  rotate: 0.7deg;
+}
+.fiche-voile, .fiche-masque, .fiche-contenu { position: relative; display: flex; flex-direction: column; min-height: 0; flex: 1 1 auto; }
+.fiche-voile, .fiche-contenu { will-change: transform; }
+.fiche[data-deroule] .fiche-masque { overflow: hidden; }
+.fiche[data-deroule] { pointer-events: none; }
+.fiche-contenu { isolation: isolate; padding: 22px 22px 14px 24px; }
+.fiche-rouleau {
+  position: absolute;
+  z-index: 3;
+  left: -7px;
+  right: -7px;
+  top: calc(100% - 3px);
+  transform-origin: 50% 18%;
+  opacity: 0;
+  pointer-events: none;
+  border-radius: 6px / 50%;
+  background-color: #e8dcc0;
+  background-image:
+    linear-gradient(270deg, rgba(45, 28, 8, 0.42), rgba(45, 28, 8, 0.12) 5px, transparent 11px),
+    linear-gradient(180deg, rgba(60, 40, 15, 0.5) 0%, rgba(255, 255, 255, 0.05) 16%, rgba(255, 255, 255, 0.5) 32%, rgba(255, 255, 255, 0.08) 50%, rgba(80, 58, 25, 0.28) 74%, rgba(35, 20, 5, 0.72) 100%),
+    var(--grain);
+  box-shadow: 0 6px 9px rgba(25, 12, 0, 0.45), 0 2px 2px rgba(25, 12, 0, 0.35);
+}
+.fiche-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+.fiche-papier {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: 2px;
+  background-color: #ece0c4;
+  background-image:
+    radial-gradient(ellipse at 18% 0%, rgba(255, 252, 240, 0.45), transparent 55%),
+    radial-gradient(ellipse at 90% 100%, rgba(140, 100, 50, 0.2), transparent 60%),
+    var(--taches),
+    var(--grain);
+  background-position: 0 0, 0 0, 61% 37%, 0 0;
+  box-shadow: inset 0 0 26px rgba(130, 96, 50, 0.3), inset 0 0 4px rgba(120, 90, 50, 0.35), 2px 6px 7px rgba(25, 12, 0, 0.38), 8px 18px 22px rgba(20, 10, 0, 0.3);
+  filter: url(#fiche-barbes) drop-shadow(0 1px 0 #c3ad83);
+}
+.fiche-contenu::before {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border: 1px solid color-mix(in srgb, var(--teinte, var(--encre-rouge)) 28%, transparent);
+  pointer-events: none;
+}
+.fiche-epingle {
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  width: 11px;
+  height: 11px;
+  translate: -50% 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 34% 30%, #fff1c2, var(--or) 40%, #6b4a14 85%);
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.5), 0 0 6px 3px rgba(120, 90, 40, 0.16);
+}
+.fiche-tete { position: relative; flex: none; text-align: center; margin-bottom: 6px; }
+.fiche-surtitre { font-family: var(--f-capitales); font-size: 12px; letter-spacing: 0.15em; color: var(--encre-pale); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 52px; }
+.fiche-titre { margin: 0; font-family: var(--f-gothique); font-weight: 400; font-size: 30px; line-height: 1.08; color: var(--encre); text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4); }
+.fiche-titre::first-letter { color: var(--teinte, var(--encre-rouge)); }
+.fiche-sous-titre { margin: 1px 0 2px; font-style: italic; font-size: 16.5px; line-height: 1.2; color: var(--encre-douce); }
+.fiche-ranger {
+  position: absolute;
+  top: -10px;
+  right: -8px;
+  padding: 2px 4px;
+  border: 0;
+  border-bottom: 1px dotted rgba(90, 64, 41, 0.55);
+  background: none;
+  font-family: var(--f-capitales);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  color: var(--encre-douce);
+}
+.fiche-ranger:hover, .fiche-ranger:focus-visible { outline: none; color: var(--encre-rouge); border-bottom-color: var(--encre-rouge); }
+.fiche-corps {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  margin: 0 -8px;
+  padding: 6px 8px 2px;
+  border-top: 3px double color-mix(in srgb, var(--teinte, var(--encre-rouge)) 40%, transparent);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(90, 70, 40, 0.32) transparent;
+}
+.fiche-prose { font-size: 16px; line-height: 1.5; padding-right: 0; }
+.fiche-prose > p:first-child::first-letter { float: none; font: inherit; padding: 0; margin: 0; color: inherit; background: none; border: 0; box-shadow: none; }
+.fiche-prose p { margin: 6px 0; }
+
+@media (min-width: 861px) and (max-width: 1139px) {
+  .fiche { left: 24px; width: calc(50% - 50px); }
+}
 
 /* ═══════════════════════════ Narrow screens ═══════════════════════════ */
 
@@ -939,6 +1066,21 @@ mark { background: var(--surligne); color: var(--encre-rouge); border-radius: 2p
   .coin { width: 44px; height: 44px; }
   .legende, .legende-sceaux, .decompte { display: none; }
 
+  .fiche.mobile {
+    position: fixed;
+    z-index: 41;
+    top: auto;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    width: auto;
+    max-height: min(calc(100dvh - 60px), 720px);
+    rotate: 0deg;
+  }
+  .fiche.mobile .fiche-contenu { padding: 20px 14px 10px 16px; }
+  .fiche.mobile .fiche-papier { box-shadow: inset 0 0 26px rgba(130, 96, 50, 0.3), 0 -6px 22px rgba(0, 0, 0, 0.7); }
+  .fiche-titre { font-size: 27px; }
+  .fiche-ranger { right: -4px; font-size: 14px; padding: 4px 6px; }
   .lien-copie { left: auto; right: 54px; top: auto; bottom: calc(100% + 14px); translate: none; width: 34px; height: 34px; }
   .lien-copie .icone { width: 28px; height: 28px; }
 }
@@ -1334,6 +1476,8 @@ mark { background: var(--surligne); color: var(--encre-rouge); border-radius: 2p
 .copie .nom-fr { font-size: 12pt; }
 .copie .nom-en { font-size: 10pt; }
 .copie .note-article { font-size: 9pt; }
+.copie-detail { margin: 2px 0 3px; font-size: 10pt; font-style: italic; color: var(--encre-douce); }
+.copie-detail p { margin: 0; }
 .copie-registre-table .valeur { white-space: nowrap; font-size: 12pt; }
 .copie-registre-table .valeur.ton-pale, .copie-registre-table .valeur-texte { font-size: 10.5pt; padding-top: 5px; white-space: normal; }
 .copie-registre-table .si-vide { font-size: 11pt; }

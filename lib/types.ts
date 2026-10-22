@@ -51,6 +51,8 @@ export type Ligne = {
   valeurs: string[]
   /** Every value cell watched by `siVide` is empty: the row shows the page's `siVide` wording instead. */
   vide: boolean
+  /** Longer note of the row (`detail` column), as HTML: touching the row opens it on a pinned slip. Empty for none. */
+  detail: string
   /** Haystack for the searches. */
   texte: string
 }

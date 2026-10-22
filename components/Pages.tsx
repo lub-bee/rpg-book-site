@@ -20,6 +20,10 @@ export type Ctx = {
   cible?: string | null
   scrollInitial?: number
   onScroll?: (v: number) => void
+  /** Opens a ledger row's detail on the pinned slip. */
+  ouvrirFiche?: (ligne: string) => void
+  /** Row whose slip is open on this page. */
+  fiche?: string | null
 }
 
 const EFFACEMENT_MS = 320
@@ -413,12 +417,29 @@ function ListeRegistre({ page, ctx }: { page: PageRegistre; ctx: Ctx }) {
           <div
             key={l.id}
             data-ligne={l.id}
-            className={`ligne ${generation > 0 ? 'ecrit' : ''} ${ctx.cible === l.id ? 'cible' : ''}`}
+            className={`ligne ${generation > 0 ? 'ecrit' : ''} ${ctx.cible === l.id ? 'cible' : ''} ${l.detail ? 'avec-detail' : ''} ${ctx.fiche === l.id ? 'epinglee' : ''}`}
             style={{ '--i': Math.min(i, 16) } as CSSProperties}
+            {...(l.detail && ctx.ouvrirFiche
+              ? {
+                  role: 'button',
+                  tabIndex: ctx.interactif ? 0 : -1,
+                  title: ctx.livre.config.textes.fiche?.aide,
+                  'aria-expanded': ctx.fiche === l.id,
+                  onClick: () => ctx.ouvrirFiche?.(l.id),
+                  onKeyDown: (e: React.KeyboardEvent) => {
+                    if (e.key !== 'Enter' && e.key !== ' ') return
+                    e.preventDefault()
+                    ctx.ouvrirFiche?.(l.id)
+                  },
+                }
+              : {})}
           >
             {avecSceau && <GlypheSceau sceau={page.sceaux.find((s) => s.cle === l.sceau)} icones={ctx.livre.icones} />}
             <div className="noms">
-              <span className="nom-fr"><Surligne texte={l.libelle} requetes={requetes} /></span>
+              <span className="nom-fr">
+                <Surligne texte={l.libelle} requetes={requetes} />
+                {l.detail && <span className="epingle-detail" aria-hidden />}
+              </span>
               {l.libelle2 && <span className="nom-en"><Surligne texte={l.libelle2} requetes={requetes} /></span>}
               {l.notes.map((n, k) => (
                 <span key={k} className="note-article">

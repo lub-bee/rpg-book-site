@@ -213,6 +213,7 @@ function RegistreCopie({ page, livre }: { page: PageRegistre; livre: Livre }) {
                     {n}
                   </span>
                 ))}
+                {l.detail && <span className="copie-detail" dangerouslySetInnerHTML={{ __html: l.detail }} />}
               </td>
               {l.vide ? (
                 <td className="si-vide" colSpan={Math.max(1, page.colonnes.length)}>

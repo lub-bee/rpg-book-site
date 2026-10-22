@@ -9,6 +9,7 @@ donnees: offres.csv
 colonnes:
   - { type: nom, titre: Ouvrage, colonnes: [fr, en] }
   - { type: note, colonne: note }
+  - { type: detail, colonne: detail }
   - { type: fourchette, titre: Prix, colonnes: [min, max], etendue: true }
   - { type: texte, titre: Délai, colonne: delai, largeur: 96, largeurEtroite: 64 }
 siVide: { colonnes: [min, max], texte: à négocier }

@@ -169,6 +169,7 @@ function lireRegistre(
   let titreLibelle = ''
   let courtLibelle = ''
   const notes: ((l: string[]) => string)[] = []
+  let detail: (l: string[]) => string = () => ''
   const colonnes: ColonneAffichee[] = []
   const cellules: ((l: string[]) => { texte: string; nombres: (number | null)[] })[] = []
   const etendue: number[] = []
@@ -177,7 +178,7 @@ function lireRegistre(
   defs.forEach((d, k) => {
     const ch = `colonnes[${k}]`
     const o = c.objet(d, ch)
-    const type = c.choix(o, 'type', ch, ['nom', 'texte', 'note', 'prix', 'fourchette'] as const)
+    const type = c.choix(o, 'type', ch, ['nom', 'texte', 'note', 'detail', 'prix', 'fourchette'] as const)
     if (k === 0) {
       if (type !== 'nom' && type !== 'texte') {
         c.erreur(`${ch}.type`, 'the first column is the row label: it must be "nom" or "texte"')
@@ -204,6 +205,16 @@ function lireRegistre(
     if (type === 'note') {
       const i = col(o.colonne, `${ch}.colonne`)
       notes.push((l) => cellule(l, i))
+      return
+    }
+    if (type === 'detail') {
+      // A longer note (Markdown) opened on a pinned slip when the row is touched: no column of its own.
+      const i = col(o.colonne, `${ch}.colonne`)
+      if (!cfg.textes.fiche) c.erreur(`${ch}.type`, 'a "detail" column needs the slip wording "textes.fiche" ({ "ranger", "aide" }) in content/livre.json')
+      detail = (l) => {
+        const t = cellule(l, i)
+        return t ? marked.parse(t, { async: false }) : ''
+      }
       return
     }
     const largeur = c.nombre(o, 'largeur', ch, LARGEURS[type])
@@ -262,6 +273,7 @@ function lireRegistre(
     const ns = notes.map((f) => f(l)).filter(Boolean)
     const sceau = sceauDe(l)
     const libelleSceau = sceaux.find((x) => x.cle === sceau)?.libelle ?? ''
+    const html = detail(l)
     sorties.push({
       id,
       sceau,
@@ -270,7 +282,8 @@ function lireRegistre(
       notes: ns,
       valeurs: valeurs.map((v) => v.texte),
       vide,
-      texte: [l1, l2, libelleSceau, ...ns, ...valeurs.filter((_, k) => colonnes[k]?.genre === 'texte').map((v) => v.texte)].join(' '),
+      detail: html,
+      texte: [l1, l2, libelleSceau, ...ns, ...valeurs.filter((_, k) => colonnes[k]?.genre === 'texte').map((v) => v.texte), html.replace(/<[^>]+>/g, ' ')].join(' '),
     })
   }
 

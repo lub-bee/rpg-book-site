@@ -89,6 +89,7 @@ All visible text is French in the example, but any language works. Templates: `{
 | `textes.refermer.gravure` / `.aide` | Word engraved on the iron latch that closes the book, and its tooltip (also the phone header key). |
 | `textes.coins.*` | Page corners: `precedente`, `suivante` (accessible names), `aidePrecedente`, `aideSuivante` (tooltips). |
 | `textes.navigation.rubans` / `.onglets` | Accessible names of the ribbons and tabs. |
+| `textes.fiche.ranger` / `.aide` | Pinned slip of a ledger row's `detail`: the "put it away" action and the rows' tooltip. Required only when a ledger has a `detail` column. |
 | `egare.titre` / `.texte` / `.retour` | The "torn page" (404). |
 | `modules.copie` | Printable copy of the book ([Printable copy](#printable-copy)). Absent or `false` = off. |
 | `credits` | Lines of the colophon on the title page. **Must credit game-icons.net** (CC BY 3.0): the book refuses to load otherwise. |
@@ -203,6 +204,7 @@ number (`25 pièces`, `"12,5 ¤"`, `1 200`): the first number of the cell is kep
 | `nom` | `titre`, `court`?, `colonnes: [main, second?]` | The row label: main name, second name in italics under it (e.g. FR / EN). **First column only.** |
 | `texte` | `titre`, `court`?, `colonne` | First column: a plain label. Elsewhere: a text value, right-aligned in italics. |
 | `note` | `colonne` | A short red small-caps mention under the label (no column of its own). |
+| `detail` | `colonne` | A longer note (Markdown allowed). No column of its own: a brass pin marks the row, and touching it opens the note on a slip pinned over the left page (bottom of the screen on phones), put away by its "Ranger" action, Escape or a page turn. Needs `textes.fiche` in `livre.json`. Printed under the row in the copy. |
 | `prix` | `titre`, `court`?, `colonne`, `ton`?, `etendue`? | A number, formatted for the locale; empty cell = `—`. |
 | `fourchette` | `titre`, `court`?, `colonnes: [low, high]`, `ton`?, `etendue`? | `low – high` (one value if they are equal or one is missing). |
 
@@ -348,6 +350,6 @@ of sealed sections), `lib/sceau.ts` (signed cookies; also `signer` / `verifier`,
 with `LIVRE_SECRET`, for future signed cookies), `middleware.ts` (cover / lock), `app/api/sceau` (book
 lock), `app/api/section` (section locks), `app/copie` + `components/Copie.tsx` (printable copy),
 `app/gaufrage.svg` (blind-pressed emblem), `components/` (book, pages, leaves, iron, `Couverture.tsx`
-the closed book's boards), `app/globals.css` (all the look). Technical traps already solved are
-commented in place (faces swap at mid-turn, leaves over the brass corners, cover front face hidden past
-90°, title page sized for short viewports).
+the closed book's boards, `Fiche.tsx` the pinned slip), `app/globals.css` (all the look). Technical
+traps already solved are commented in place (faces swap at mid-turn, leaves over the brass corners,
+cover front face hidden past 90°, title page sized for short viewports).

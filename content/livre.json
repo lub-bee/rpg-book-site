@@ -114,7 +114,8 @@
       "aidePrecedente": "Tirer ou cliquer pour revenir en arrière",
       "aideSuivante": "Tirer ou cliquer pour tourner la page"
     },
-    "navigation": { "rubans": "Sections du livre", "onglets": "Pages de la section" }
+    "navigation": { "rubans": "Sections du livre", "onglets": "Pages de la section" },
+    "fiche": { "ranger": "Ranger", "aide": "Lire la note épinglée" }
   },
 
   "modules": {

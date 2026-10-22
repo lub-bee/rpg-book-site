@@ -1,5 +1,5 @@
-fr,en,min,max,note,delai
-Livre relié simple,Simple Bound Book,200,400,"S'ouvre d'un geste, sans serrure",quatre jours
-Livre relié scellé,Sealed Bound Book,400,600,"Serrure de fer, mot confié au seul propriétaire",quatre jours
-Livre des prix scellé,Sealed Price Book,600,800,Registre de prix sous serrure,quatre jours
-Grimoire sur commande,Commissioned Grimoire,,,"Artiste, enluminures et demandes hors du commun",à convenir
+fr,en,min,max,note,delai,detail
+Livre relié simple,Simple Bound Book,200,400,"S'ouvre d'un geste, sans serrure",quatre jours,"Couverture de cuir, emblème doré, pages qui se tournent du bout du doigt. **Aucune serrure** : tout lecteur peut l'ouvrir."
+Livre relié scellé,Sealed Bound Book,400,600,"Serrure de fer, mot confié au seul propriétaire",quatre jours,"Le même ouvrage, fermé d'une serrure de fer sur la couverture. Le copiste forge **un seul mot** et ne le confie qu'au propriétaire du livre."
+Livre des prix scellé,Sealed Price Book,600,800,Registre de prix sous serrure,quatre jours,"Un registre de prix tenu sous serrure. Chaque feuillet se cherche à la plume, et les tarifs ne quittent jamais le livre."
+Grimoire sur commande,Commissioned Grimoire,,,"Artiste, enluminures et demandes hors du commun",à convenir,"Enluminures, sections secrètes, pages qui s'écrivent encore : on en parle autour d'une table, et le copiste fixe son prix une fois l'ouvrage compris."

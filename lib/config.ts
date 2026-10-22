@@ -60,6 +60,8 @@ export type Config = {
     refermer: { gravure: string; aide: string }
     coins: { precedente: string; suivante: string; aidePrecedente: string; aideSuivante: string }
     navigation: { rubans: string; onglets: string }
+    /** Pinned slip (a ledger row's `detail`): the "put it away" action and the rows' tooltip. Null when not given. */
+    fiche: { ranger: string; aide: string } | null
   }
   /** Optional modules: null = off. */
   modules: {
@@ -159,6 +161,7 @@ function lire(v: unknown): Config {
   for (const k of ['intensite', 'registres'] as const) {
     if (gaufrage && (gaufrage[k] < 0 || gaufrage[k] > 1)) c.erreur(`apparence.gaufrage.${k}`, 'must be between 0 and 1')
   }
+  const fiche = textes.fiche === undefined ? null : c.objet(textes.fiche, 'textes.fiche')
   const copie = active(modules.copie, 'modules.copie')
   if (mois.length && mois.length !== 12) c.erreur('calendrier.mois', 'must list the 12 month names (or be left out)')
 
@@ -241,6 +244,7 @@ function lire(v: unknown): Config {
         aideSuivante: c.texte(coins, 'aideSuivante', 'textes.coins'),
       },
       navigation: { rubans: c.texte(navigation, 'rubans', 'textes.navigation'), onglets: c.texte(navigation, 'onglets', 'textes.navigation') },
+      fiche: fiche && { ranger: c.texte(fiche, 'ranger', 'textes.fiche'), aide: c.texte(fiche, 'aide', 'textes.fiche') },
     },
     modules: {
       copie: copie && {
