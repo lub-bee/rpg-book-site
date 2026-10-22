@@ -330,7 +330,8 @@ Drop new files in `public/textures/` and point `livre.json` at them. The open bo
 ### Blind-pressed emblem
 
 `"apparence": { "gaufrage": { "intensite": 0.7, "registres": 0.45 } }` presses the book's emblem into
-every page, as if the paper had been pushed in: centred on the spine across a spread, larger than the
+every page, as if the paper had been pushed in (a faint tint with a whisper of relief, noticed on a second
+look, never in the way of the text): centred on the spine across a spread, larger than the
 page on phones. `intensite` (0 to 1) is its strength on most pages, `registres` on ledger pages (kept
 fainter so the rows stay legible); `true` takes these defaults. The relief is drawn from
 `content/embleme.svg` by `/gaufrage.svg` (no image to prepare) and laid as a static background, so
