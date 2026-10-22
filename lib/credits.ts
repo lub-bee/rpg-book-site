@@ -6,7 +6,7 @@
  * `moteur` credits what the template itself ships: the game-icons.net icons (CC BY 3.0), the Poly Haven
  * photo textures (CC0) and the Google Fonts typefaces (SIL OFL). A book that replaces the textures or the
  * fonts turns them off ("creditsMoteur": false) and writes its own "rubriques". The same facts are in
- * README.md (« Credits & licenses ») and LICENSE-CONTENT.md.
+ * README.md (« Credits & licenses ») and NOTICE.md.
  */
 
 export type Rubrique = { titre: string; texte: string }

@@ -384,7 +384,7 @@ its table of contents.
   `cuir-impression.jpg` and `fer.jpg`; `parchemin-impression.jpg` (print parchment) is made for the project.
 - Fonts: UnifrakturMaguntia, IM Fell English / IM Fell English SC (SIL Open Font License, Google Fonts).
 - Licenses: code under MIT (`LICENSE`); the showcase content (texts, ledgers, emblem) under CC BY-NC 4.0,
-  Ri'Oblan (`LICENSE-CONTENT.md`, which lists exactly what it covers and the third-party exceptions).
+  Ri'Oblan. `NOTICE.md` lists exactly what that covers and the third-party exceptions.
   Your own book's content is yours: replace the showcase content and license it as you wish.
 - The showcase borrows from The Elder Scrolls (the Khajiit, septims), property of Bethesda Softworks /
   ZeniMax Media. Fan work, not affiliated, not for sale. The engine references no third-party universe.
